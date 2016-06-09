@@ -54,6 +54,54 @@ public class Gui extends JFrame
 		setVisible(true);
 	}
 
+	public static void setSystemLookAndFeel()
+	{
+		setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+	}
+
+	private static void setLookAndFeel(String lookAndFeel)
+	{
+		JFrame frame = new JFrame();
+
+		try
+		{
+			UIManager.setLookAndFeel(lookAndFeel);
+		}
+		catch(Exception e)
+		{
+			try
+			{
+				UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+			}
+			catch(Exception ignored)
+			{
+			}
+		}
+
+		JPanel panel = new JPanel();
+		panel.setBorder(BorderFactory.createTitledBorder("test"));
+		frame.add(panel);
+
+		try
+		{
+			frame.pack();
+		}
+		catch(Exception e)
+		{
+			try
+			{
+				UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+			}
+			catch(Exception ignored)
+			{
+			}
+		}
+
+		frame.dispose();
+
+		JFrame.setDefaultLookAndFeelDecorated(false);
+	}
+
 	private void initUIComponents()
 	{
 		info.setAutoscrolls(false);
@@ -183,54 +231,6 @@ public class Gui extends JFrame
 				}
 			}
 		});
-	}
-
-	public static void setSystemLookAndFeel()
-	{
-		setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-	}
-
-	private static void setLookAndFeel(String lookAndFeel)
-	{
-		JFrame frame = new JFrame();
-
-		try
-		{
-			UIManager.setLookAndFeel(lookAndFeel);
-		}
-		catch(Exception e)
-		{
-			try
-			{
-				UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-			}
-			catch(Exception ignored)
-			{
-			}
-		}
-
-		JPanel panel = new JPanel();
-		panel.setBorder(BorderFactory.createTitledBorder("test"));
-		frame.add(panel);
-
-		try
-		{
-			frame.pack();
-		}
-		catch(Exception e)
-		{
-			try
-			{
-				UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-			}
-			catch(Exception ignored)
-			{
-			}
-		}
-
-		frame.dispose();
-
-		JFrame.setDefaultLookAndFeelDecorated(false);
 	}
 
 	private void createUIComponents()

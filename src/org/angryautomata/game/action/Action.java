@@ -11,11 +11,6 @@ public enum Action
 		this.id = id;
 	}
 
-	public int getId()
-	{
-		return id;
-	}
-
 	public static int count()
 	{
 		return values().length;
@@ -32,5 +27,10 @@ public enum Action
 		}
 
 		return null;
+	}
+
+	public int getId()
+	{
+		return id;
 	}
 }

@@ -17,31 +17,6 @@ public abstract class Scenery
 		setTrapped(trapped);
 	}
 
-	public int getFakeSymbol()
-	{
-		return symbol;
-	}
-
-	public int getSymbol()
-	{
-		return trapped ? getFakeSymbol() + SCENERIES - 1 : getFakeSymbol();
-	}
-
-	public int gradient()
-	{
-		return trapped ? -grad : grad;
-	}
-
-	public boolean isTrapped()
-	{
-		return trapped;
-	}
-
-	public void setTrapped(boolean trapped)
-	{
-		this.trapped = trapped;
-	}
-
 	public static int sceneries()
 	{
 		return SCENERIES;
@@ -91,5 +66,30 @@ public abstract class Scenery
 				return new Desert();
 			}
 		}
+	}
+
+	public int getFakeSymbol()
+	{
+		return symbol;
+	}
+
+	public int getSymbol()
+	{
+		return trapped ? getFakeSymbol() + SCENERIES - 1 : getFakeSymbol();
+	}
+
+	public int gradient()
+	{
+		return trapped ? -grad : grad;
+	}
+
+	public boolean isTrapped()
+	{
+		return trapped;
+	}
+
+	public void setTrapped(boolean trapped)
+	{
+		this.trapped = trapped;
 	}
 }
