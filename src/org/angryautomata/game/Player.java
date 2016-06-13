@@ -113,4 +113,10 @@ public class Player
 
 		return x >= originX && x < originX + automaton.numberOfStates() && y >= originY && y < originY + Scenery.sceneries();
 	}
+
+	public Position precedent()
+	{
+		return prev;
+	}
+
 }

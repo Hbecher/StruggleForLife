@@ -47,7 +47,7 @@ public class Main extends Application
 
 		Automaton automaton2 = new Automaton(transitions2, actions2, origin2, "TonAutomateNase", 159);
 
-		Board board = new Board(16, 16);
+		Board board = new Board(32, 16);
 
 		Controller root = new Controller();
 		Game game = new Game(root, board, automaton1, automaton2);

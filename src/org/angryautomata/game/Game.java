@@ -184,31 +184,19 @@ public class Game implements Runnable
 			int symbolw = w.getSymbol();
 			List l = new ArrayList<Action>();
 
-			if(symboln != 0)
-			{
-				l.add(Action.byId(-1));
+				if (symboln!=0 && board.torusPos(origin.getX(), origin.getY()-1)!=player.precedent()) { l.add(Action.byId(-1));}
+				if (symbols!=0 && board.torusPos(origin.getX(), origin.getY()+1)!=player.precedent()) { l.add(Action.byId(-2));}
+				if (symbole!=0 && board.torusPos(origin.getX()+1, origin.getY())!=player.precedent()) { l.add(Action.byId(-3));}
+				if (symbolw!=0 && board.torusPos(origin.getX()-1, origin.getY())!=player.precedent()) { l.add(Action.byId(-4));}
+				if(l.isEmpty())
+				{
+					l.add(Action.byId(-1));
+					l.add(Action.byId(-2));
+					l.add(Action.byId(-3));
+					l.add(Action.byId(-4));
+				}
+				return (Action) l.get((int) (Math.random() * l.size()));
 			}
-			if(symbols != 0)
-			{
-				l.add(Action.byId(-2));
-			}
-			if(symbole != 0)
-			{
-				l.add(Action.byId(-3));
-			}
-			if(symbolw != 0)
-			{
-				l.add(Action.byId(-4));
-			}
-			if(l.isEmpty())
-			{
-				l.add(Action.byId(-1));
-				l.add(Action.byId(-2));
-				l.add(Action.byId(-3));
-				l.add(Action.byId(-4));
-			}
-			return (Action) l.get((int) (Math.random() * l.size()));
-		}
 
 		return matches(action, o) ? action : Action.byId(-1);
 	}
