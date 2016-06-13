@@ -1,9 +1,10 @@
 package org.angryautomata.game;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import javafx.scene.paint.Color;
 
 public class Automaton
 {
@@ -20,7 +21,7 @@ public class Automaton
 		this.actions = actions;
 		this.origin = origin;
 		this.name = name;
-		color = new Color(redness, 0, 0);
+		color = Color.rgb(redness, 0, 0);
 	}
 
 	public int nextState(int state, int symbol)

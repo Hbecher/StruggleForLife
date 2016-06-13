@@ -1,14 +1,14 @@
 package org.angryautomata.game;
 
-import java.awt.*;
-import java.util.*;
-import java.util.List;
 
+import java.util.*;
+
+import javafx.application.Platform;
+import org.angryautomata.Controller;
 import org.angryautomata.game.action.Action;
 import org.angryautomata.game.scenery.Desert;
 import org.angryautomata.game.scenery.Meadow;
 import org.angryautomata.game.scenery.Scenery;
-import org.angryautomata.gui.Gui;
 
 public class Game implements Runnable
 {
@@ -16,13 +16,14 @@ public class Game implements Runnable
 	private final Automaton[] automata;
 	private final Map<Player, Position> players = new HashMap<>();
 	private final Map<Position, LinkedList<Update>> toUpdate = new HashMap<>();
-	private Gui gui = null;
+	private final Controller controller;
 	private long tickSpeed = 200L;
 	private boolean pause = true, run = true;
 	private int ticks = 0;
 
-	public Game(Board board, Automaton... automata)
+	public Game(Controller controller, Board board, Automaton... automata)
 	{
+		this.controller = controller;
 		this.board = board;
 		this.automata = automata;
 
@@ -72,7 +73,6 @@ public class Game implements Runnable
 				Player player = entry.getKey();
 
 				Position self = entry.getValue();
-				Position[] card = {board.torusPos(self.getX(), self.getY() - 1), board.torusPos(self.getX() + 1, self.getY()), board.torusPos(self.getX(), self.getY() + 1), board.torusPos(self.getX() - 1, self.getY())};
 
 				Scenery o = board.getSceneryAt(self);
 
@@ -90,7 +90,7 @@ public class Game implements Runnable
 					}
 					else if(action == Action.MIGRATE)
 					{
-						entry.setValue(card[(int) (Math.random() * card.length)]);
+						entry.setValue(board.torusPos(self.getX() + (int) (Math.random() * 3.0D) - 1, self.getY() + (int) (Math.random() * 3.0D) - 1));
 
 						player.updateGradient(-1);
 					}
@@ -175,17 +175,7 @@ public class Game implements Runnable
 				}
 			}
 
-			if(gui != null)
-			{
-				Map<Position, Color> colors = new HashMap<>();
-
-				for(Map.Entry<Player, Position> entry : players.entrySet())
-				{
-					colors.put(entry.getValue(), entry.getKey().getColor());
-				}
-
-				gui.update(board, colors, automata);
-			}
+			Platform.runLater(() -> controller.update(Collections.unmodifiableMap(players)));
 
 			ticks++;
 
@@ -202,12 +192,13 @@ public class Game implements Runnable
 
 	private Action action(Player player, Scenery o)
 	{
+		// balise - consommer ou pieger - migrer selon autour
 		int state = player.getState();
 		Position origin = player.getAutomaton().getOrigin();
 		int id = board.getSceneryAt(board.torusPos(origin.getX() + state, origin.getY() + o.getFakeSymbol())).getSymbol();
 		Action action = Action.byId(id);
 
-		return action != null && matches(action, o) ? action : Action.MIGRATE;
+		return matches(action, o) ? action : Action.MIGRATE;
 	}
 
 	private boolean matches(Action action, Scenery scenery)
@@ -302,8 +293,13 @@ public class Game implements Runnable
 		return board.getHeight();
 	}
 
-	public void setGui(Gui gui)
+	public Scenery getSceneryAt(Position position)
 	{
-		this.gui = gui;
+		return board.getSceneryAt(position);
+	}
+
+	public void setSceneryAt(Position position, Scenery scenery)
+	{
+		board.setSceneryAt(position, scenery);
 	}
 }

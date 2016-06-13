@@ -1,6 +1,6 @@
 package org.angryautomata.game;
 
-import java.awt.*;
+import javafx.scene.paint.Color;
 
 public class Player
 {

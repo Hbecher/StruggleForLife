@@ -26,7 +26,7 @@ public enum Action
 			}
 		}
 
-		return null;
+		return NOTHING;
 	}
 
 	public int getId()
