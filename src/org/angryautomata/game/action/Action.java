@@ -6,6 +6,7 @@ import java.util.List;
 import org.angryautomata.game.Game;
 import org.angryautomata.game.Player;
 import org.angryautomata.game.Position;
+import org.angryautomata.game.scenery.Scenery;
 
 public abstract class Action
 {
@@ -23,7 +24,7 @@ public abstract class Action
 		return id;
 	}
 
-	public abstract void execute(Game game, Player player, Object... params);
+	public abstract void execute(Game game, Player player);
 
 	public static Action byId(int id)
 	{
@@ -56,9 +57,12 @@ public abstract class Action
 		register(new Action(0)
 		{
 			@Override
-			public void execute(Game game, Player player, Object... params)
+			public void execute(Game game, Player player)
 			{
-				Direction dir = (Direction) params[0];
+				Scenery n = board.getSceneryAt(board.torusPos((self.getX()), self.getY() - 1));
+				Scenery e = board.getSceneryAt(board.torusPos(self.getX() + 1, self.getY()));
+				Scenery s = board.getSceneryAt(board.torusPos(self.getX(), self.getY() + 1));
+				Scenery w = board.getSceneryAt(board.torusPos(self.getX() - 1, self.getY()));;
 				int relX, relY;
 
 				switch(dir)
@@ -91,7 +95,7 @@ public abstract class Action
 		register(new Action(1)
 		{
 			@Override
-			public void execute(Game game, Player player, Object... params)
+			public void execute(Game game, Player player)
 			{
 				Position self = player.getPosition();
 
@@ -103,7 +107,7 @@ public abstract class Action
 		register(new Action(2)
 		{
 			@Override
-			public void execute(Game game, Player player, Object... params)
+			public void execute(Game game, Player player)
 			{
 				Position self = player.getPosition();
 
@@ -115,7 +119,7 @@ public abstract class Action
 		register(new Action(1)
 		{
 			@Override
-			public void execute(Game game, Player player, Object... params)
+			public void execute(Game game, Player player)
 			{
 				Position self = player.getPosition();
 

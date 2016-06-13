@@ -6,8 +6,6 @@ import java.util.*;
 import javafx.application.Platform;
 import org.angryautomata.Controller;
 import org.angryautomata.game.action.Action;
-import org.angryautomata.game.scenery.Desert;
-import org.angryautomata.game.scenery.Meadow;
 import org.angryautomata.game.scenery.Scenery;
 
 public class Game implements Runnable
@@ -69,17 +67,15 @@ public class Game implements Runnable
 
 			List<Player> clones = new ArrayList<>(), dead = new ArrayList<>();
 
-			for(Map.Entry<Player, Position> entry : players.entrySet())
+			for(Player player : players)
 			{
-				Player player = entry.getKey();
-
-				Position self = entry.getValue();
+				Position self = player.getPosition();
 
 				Scenery o = board.getSceneryAt(self);
-				Scenery n = board.getSceneryAt(board.torusPos((self.getX()),self.getY()-1));
-				Scenery e = board.getSceneryAt(board.torusPos(self.getX()+1,self.getY()));
-				Scenery s = board.getSceneryAt(board.torusPos(self.getX(),self.getY()+1));
-				Scenery w = board.getSceneryAt(board.torusPos(self.getX()-1,self.getY()));
+				Scenery n = board.getSceneryAt(board.torusPos((self.getX()), self.getY() - 1));
+				Scenery e = board.getSceneryAt(board.torusPos(self.getX() + 1, self.getY()));
+				Scenery s = board.getSceneryAt(board.torusPos(self.getX(), self.getY() + 1));
+				Scenery w = board.getSceneryAt(board.torusPos(self.getX() - 1, self.getY()));
 
 				if(player.canClone())
 				{
@@ -89,61 +85,7 @@ public class Game implements Runnable
 				{
 					Action action = action(player, o, n, e, s, w);
 
-					if(action == Action.NOTHING)
-					{
-						player.updateGradient(-1);
-					}
-					else if(action == Action.NORD )
-					{
-						entry.setValue(board.torusPos(self.getX() , self.getY() - 1));
-
-						player.updateGradient(-1);
-					}
-					else if(action == Action.SUD )
-					{
-						entry.setValue(board.torusPos(self.getX() , self.getY() + 1));
-
-						player.updateGradient(-1);
-					}
-					else if(action == Action.EAST )
-					{
-						entry.setValue(board.torusPos(self.getX() +1, self.getY()));
-
-						player.updateGradient(-1);
-					}
-					else if(action == Action.WEST )
-					{
-						entry.setValue(board.torusPos(self.getX() -1, self.getY()));
-
-						player.updateGradient(-1);
-					}
-					else if(action == Action.POLLUTE || action == Action.CONTAMINATE || action == Action.POISON)
-					{
-						board.getSceneryAt(self).setTrapped(true);
-
-						player.updateGradient(-1);
-					}
-					else
-					{
-						if(action == Action.DRAW)
-						{
-							player.updateGradient(o.gradient());
-
-							board.setSceneryAt(self, new Desert());
-						}
-						else if(action == Action.HARVEST)
-						{
-							player.updateGradient(o.gradient());
-
-							board.setSceneryAt(self, new Desert());
-						}
-						else if(action == Action.CUT)
-						{
-							player.updateGradient(o.gradient());
-
-							board.setSceneryAt(self, new Meadow(false));
-						}
-					action.execute(this, player, self);
+					action.execute(this, player);
 
 					if(!toUpdate.containsKey(self))
 					{
@@ -174,7 +116,7 @@ public class Game implements Runnable
 
 			for(Player player : clones)
 			{
-				addPlayer(player, board.randomPos());
+				addPlayer(player);
 			}
 
 			dead.forEach(this::removePlayer);
@@ -205,11 +147,7 @@ public class Game implements Runnable
 
 			Platform.runLater(() -> controller.update(Collections.unmodifiableList(players)));
 
-			for(Player player : clones)
-			{
-				addPlayer(player);
-			}
-
+			clones.forEach(this::addPlayer);
 			dead.forEach(this::removePlayer);
 
 			if(players.isEmpty())
@@ -239,28 +177,40 @@ public class Game implements Runnable
 		Action action = Action.byId(id);
 
 		if(id == 0)
+		{
+			int symboln = n.getSymbol();
+			int symbole = e.getSymbol();
+			int symbols = s.getSymbol();
+			int symbolw = w.getSymbol();
+			List l = new ArrayList<Action>();
+
+			if(symboln != 0)
 			{
-				int symboln = n.getSymbol();
-				int symbole = e.getSymbol();
-				int symbols = s.getSymbol();
-				int symbolw = w.getSymbol();
-				List l = new ArrayList<Action>();
-
-				if (symboln!=0) { l.add(Action.byId(-1));}
-				if (symbols!=0) { l.add(Action.byId(-2));}
-				if (symbole!=0) { l.add(Action.byId(-3));}
-				if (symbolw!=0) { l.add(Action.byId(-4));}
-				if(l.isEmpty())
-				{
-					l.add(Action.byId(-1));
-					l.add(Action.byId(-2));
-					l.add(Action.byId(-3));
-					l.add(Action.byId(-4));
-				}
-				return (Action) l.get((int) (Math.random() * l.size()));
+				l.add(Action.byId(-1));
 			}
+			if(symbols != 0)
+			{
+				l.add(Action.byId(-2));
+			}
+			if(symbole != 0)
+			{
+				l.add(Action.byId(-3));
+			}
+			if(symbolw != 0)
+			{
+				l.add(Action.byId(-4));
+			}
+			if(l.isEmpty())
+			{
+				l.add(Action.byId(-1));
+				l.add(Action.byId(-2));
+				l.add(Action.byId(-3));
+				l.add(Action.byId(-4));
+			}
+			return (Action) l.get((int) (Math.random() * l.size()));
+		}
 
-		return matches(action, o) ? action : Action.NOTHING;
+		return matches(action, o) ? action : Action.byId(-1);
 	}
 
 	private boolean matches(Action action, Scenery scenery)
