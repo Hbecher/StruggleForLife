@@ -1,95 +1,73 @@
 package org.angryautomata.game.scenery;
 
-public abstract class Scenery
+import java.util.ArrayList;
+import java.util.List;
+
+import org.angryautomata.game.action.Action;
+
+public class Scenery
 {
-	private static int SCENERIES = 4;
+	private static final List<Scenery> SCENERIES = new ArrayList<>();
+
+	static
+	{
+		SCENERIES.add(new Scenery(0, null, 0));
+		SCENERIES.add(new Scenery(1, null, 2));
+		SCENERIES.add(new Scenery(2, null, 3));
+		SCENERIES.add(new Scenery(3, null, 5));
+	}
 
 	private final int symbol;
-	private final int grad;
-	private boolean trapped;
+	private final int gradient;
+	private final Action[] validActions;
 
-	// texture, etc..
-	Scenery(int symbol, int grad, boolean trapped)
+	private Scenery(int symbol, Action[] validActions, int gradient)
 	{
 		this.symbol = symbol;
-		this.grad = grad;
-
-		setTrapped(trapped);
+		this.gradient = gradient;
+		this.validActions = validActions;
 	}
 
 	public static int sceneries()
 	{
-		return SCENERIES;
+		return SCENERIES.size();
 	}
 
 	public static Scenery byId(int id)
 	{
-		switch(id)
+		for(Scenery scenery : SCENERIES)
 		{
-			case 0:
+			if(scenery.getSymbol() == id)
 			{
-				return new Desert();
-			}
-
-			case 1:
-			{
-				return new Lake(false);
-			}
-
-			case 2:
-			{
-				return new Meadow(false);
-			}
-
-			case 3:
-			{
-				return new Forest(false);
-			}
-
-			case 4:
-			{
-				return new Lake(true);
-			}
-
-			case 5:
-			{
-				return new Meadow(true);
-			}
-
-			case 6:
-			{
-				return new Forest(true);
-			}
-
-			default:
-			{
-				return new Desert();
+				return scenery;
 			}
 		}
+
+		return null;
 	}
 
 	public int getFakeSymbol()
 	{
-		return symbol;
+		return symbol >= sceneries() ? symbol + 1 - sceneries() : symbol;
 	}
 
 	public int getSymbol()
 	{
-		return trapped ? getFakeSymbol() + SCENERIES - 1 : getFakeSymbol();
+		return symbol;
 	}
 
-	public int gradient()
+	public int getGradient()
 	{
-		return trapped ? -grad : grad;
+		return gradient;
 	}
 
-	public boolean isTrapped()
+	public Scenery getTrapped()
 	{
-		return trapped;
+		return symbol >= sceneries() ? this : new Scenery(getSymbol() + sceneries() - 1, validActions, -getGradient());
 	}
 
-	public void setTrapped(boolean trapped)
+	public Scenery getNotTrapped()
 	{
-		this.trapped = trapped;
+		return symbol < sceneries() ? this : new Scenery(getSymbol() + 1 - sceneries(), validActions, -getGradient());
 	}
 }

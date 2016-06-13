@@ -36,12 +36,16 @@ public class Board
 
 	public void setSceneryAt(Position position, Scenery scenery)
 	{
-		terrain[position.getY()][position.getX()] = scenery;
+		Position torus = torusPos(position.getX(), position.getY());
+
+		terrain[torus.getY()][torus.getX()] = scenery;
 	}
 
 	public Scenery getSceneryAt(Position position)
 	{
-		return terrain[position.getY()][position.getX()];
+		Position torus = torusPos(position.getX(), position.getY());
+
+		return terrain[torus.getY()][torus.getX()];
 	}
 
 	public Position torusPos(int x, int y)
