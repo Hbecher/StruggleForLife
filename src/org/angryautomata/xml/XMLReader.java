@@ -22,7 +22,7 @@ public class XMLReader
 
 		// long lasting =System.currentTimeMillis();
                 Scanner in = new Scanner(System.in);
-                System.out.print("输入查询信息：");
+                System.out.print("Please enter the name of XML：");
 		try
 		{
 
