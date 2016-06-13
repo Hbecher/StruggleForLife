@@ -30,12 +30,12 @@ public class Main extends Application
 		Automaton automaton1 = new Automaton(transitions1, actions1, origin1, "MonAutomateCool", 255);
 
 		Position origin2 = new Position(3, 6);
-		int[][] transitions2 = new int[4][9];
+		int[][] transitions2 = new int[4][1];
 		for(int i = 0; i < 4; i++)
 		{
-			for(int j = 0; j < 9; j++)
+			for(int j = 0; j < 1; j++)
 			{
-				transitions2[i][j] = (int) (Math.random() * 9);
+				transitions2[i][j] = (int) (Math.random() * 1);
 			}
 		}
 		int[][] actions2 = {
