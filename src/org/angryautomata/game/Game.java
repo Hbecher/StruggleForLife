@@ -4,6 +4,7 @@ package org.angryautomata.game;
 import java.util.*;
 
 import javafx.application.Platform;
+import jdk.nashorn.internal.ir.Symbol;
 import org.angryautomata.Controller;
 import org.angryautomata.game.action.Action;
 import org.angryautomata.game.scenery.Desert;
@@ -190,7 +191,7 @@ public class Game implements Runnable
 		}
 	}
 
-	private Action action(Player player, Scenery o)
+	private Action action(Player player, Scenery o, Scenery n, Scenery e, Scenery s, Scenery w)
 	{
 		// balise - consommer ou pieger - migrer selon autour
 		int state = player.getState();
@@ -198,7 +199,23 @@ public class Game implements Runnable
 		int id = board.getSceneryAt(board.torusPos(origin.getX() + state, origin.getY() + o.getFakeSymbol())).getSymbol();
 		Action action = Action.byId(id);
 
-		return matches(action, o) ? action : Action.MIGRATE;
+		if(id == 0)
+			{
+				int symboln = n.getSymbol();
+				int symbole = e.getSymbol();
+				int symbols = s.getSymbol();
+				int symbolw = w.getSymbol();
+				List l = new ArrayList<Direction>();
+
+				if (symboln!=0) { l.add(NORD);}
+				if (symbols!=0) { l.add(SUD);}
+				if (symbole!=0) { l.add(EST);}
+				if (symbolw!=0) { l.add(WEST);}
+
+				return Action.MIGRATE(l.get((int) (Math.random() * l.size())));
+			}
+
+		return matches(action, o) ? action : Action.NOTHING;
 	}
 
 	private boolean matches(Action action, Scenery scenery)
