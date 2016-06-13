@@ -15,7 +15,7 @@ public class XMLReader
 {
 
 	/*Je suis seulement en train d'essayer utliser EGIT en Eclipse......pas cool*/
-	public static void main(String arge[])
+	public static void main(String args[])
 	{
 
 		// long lasting =System.currentTimeMillis();

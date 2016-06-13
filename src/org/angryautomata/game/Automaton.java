@@ -15,13 +15,13 @@ public class Automaton
 	private final Color color;
 	private final List<Player> players = new ArrayList<>();
 
-	public Automaton(int[][] transitions, int[][] actions, Position origin, String name, int redness)
+	public Automaton(int[][] transitions, int[][] actions, Position origin, String name, int rgba)
 	{
 		this.transitions = transitions;
 		this.actions = actions;
 		this.origin = origin;
 		this.name = name;
-		color = Color.rgb(redness, 0, 0);
+		color = Color.rgb((rgba >> 16) & 0xFF, (rgba >> 8) & 0xFF, rgba & 0xFF, ((rgba >> 24) & 0xFF) / 255.0D);
 	}
 
 	public int nextState(int state, int symbol)

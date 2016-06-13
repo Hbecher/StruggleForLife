@@ -1,7 +1,7 @@
 package org.angryautomata;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.List;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -59,7 +59,7 @@ public class Controller extends VBox
 		return canvas;
 	}
 
-	public void update(final Map<Player, Position> players)
+	public void update(final List<Player> players)
 	{
 		final GraphicsContext gc = canvas.getGraphicsContext2D();
 		final int height = game.getHeight(), width = game.getWidth();
@@ -92,10 +92,9 @@ public class Controller extends VBox
 			}
 		}
 
-		for(Map.Entry<Player, Position> entry : players.entrySet())
+		for(Player player : players)
 		{
-			Player player = entry.getKey();
-			Position position = entry.getValue();
+			Position position = player.getPosition();
 
 			double x = player.getGradient() * 0.12D + 4.0D, length = 2 * x, offset = squareSize / 2.0D - x;
 

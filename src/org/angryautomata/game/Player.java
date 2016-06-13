@@ -1,6 +1,7 @@
 package org.angryautomata.game;
 
 import javafx.scene.paint.Color;
+import org.angryautomata.game.scenery.Scenery;
 
 public class Player
 {
@@ -9,12 +10,14 @@ public class Player
 	private final int team;
 	private int state;
 	private int gradient = initGradient;
+	private Position position, prev = null;
 
-	public Player(Automaton automaton, int state, int team)
+	public Player(Automaton automaton, int state, int team, Position position)
 	{
 		this.automaton = automaton;
 		this.state = state;
 		this.team = team;
+		this.position = position;
 
 		automaton.addPlayer(this);
 	}
@@ -44,6 +47,23 @@ public class Player
 		return team;
 	}
 
+	public Position getPosition()
+	{
+		return position;
+	}
+
+	public void moveTo(Position position)
+	{
+		prev = this.position;
+		this.position = position;
+	}
+
+	public void move(int relX, int relY)
+	{
+		prev = position;
+		position = new Position(position.getX() + relX, position.getY() + relY);
+	}
+
 	public Color getColor()
 	{
 		return automaton.getColor();
@@ -66,7 +86,9 @@ public class Player
 
 	public Player createClone()
 	{
-		Player clone = new Player(automaton, 0, team);
+		Position clonePos = new Position(position.getX() + (int) (Math.random() * 3.0D) - 1, position.getY() + (int) (Math.random() * 3.0D) - 1);
+
+		Player clone = new Player(automaton, 0, team, clonePos);
 
 		clone.updateGradient(-initGradient);
 
@@ -83,9 +105,12 @@ public class Player
 		automaton.removePlayer(this);
 	}
 
-	@Override
-	public String toString()
+	public boolean isInTrouble()
 	{
-		return state + ", " + gradient;
+		Position origin = automaton.getOrigin();
+		int originX = origin.getX(), originY = origin.getY();
+		int x = position.getX(), y = position.getY();
+
+		return x >= originX && x < originX + automaton.numberOfStates() && y >= originY && y < originY + Scenery.sceneries();
 	}
 }

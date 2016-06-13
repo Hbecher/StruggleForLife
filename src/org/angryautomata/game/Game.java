@@ -6,20 +6,19 @@ import java.util.*;
 import javafx.application.Platform;
 import org.angryautomata.Controller;
 import org.angryautomata.game.action.Action;
-import org.angryautomata.game.scenery.Desert;
-import org.angryautomata.game.scenery.Meadow;
 import org.angryautomata.game.scenery.Scenery;
 
 public class Game implements Runnable
 {
 	private final Board board;
 	private final Automaton[] automata;
-	private final Map<Player, Position> players = new HashMap<>();
+	private final List<Player> players = new ArrayList<>();
 	private final Map<Position, LinkedList<Update>> toUpdate = new HashMap<>();
 	private final Controller controller;
 	private long tickSpeed = 200L;
 	private boolean pause = true, run = true;
 	private int ticks = 0;
+	private boolean mapUpdated = false;
 
 	public Game(Controller controller, Board board, Automaton... automata)
 	{
@@ -46,7 +45,7 @@ public class Game implements Runnable
 				}
 			}
 
-			addPlayer(new Player(automaton, 0, 0), board.randomPos());
+			addPlayer(new Player(automaton, 0, 0, board.randomPos()));
 		}
 	}
 
@@ -68,11 +67,9 @@ public class Game implements Runnable
 
 			List<Player> clones = new ArrayList<>(), dead = new ArrayList<>();
 
-			for(Map.Entry<Player, Position> entry : players.entrySet())
+			for(Player player : players)
 			{
-				Player player = entry.getKey();
-
-				Position self = entry.getValue();
+				Position self = player.getPosition();
 
 				Scenery o = board.getSceneryAt(self);
 
@@ -84,51 +81,20 @@ public class Game implements Runnable
 				{
 					Action action = action(player, o);
 
-					if(action == Action.NOTHING)
+					action.execute(this, player, self);
+
+					if(!toUpdate.containsKey(self))
 					{
-						player.updateGradient(-1);
+						toUpdate.put(self, new LinkedList<>());
 					}
-					else if(action == Action.MIGRATE)
+
+					if(mapUpdated)
 					{
-						entry.setValue(board.torusPos(self.getX() + (int) (Math.random() * 3.0D) - 1, self.getY() + (int) (Math.random() * 3.0D) - 1));
-
-						player.updateGradient(-1);
-					}
-					else if(action == Action.POLLUTE || action == Action.CONTAMINATE || action == Action.POISON)
-					{
-						board.getSceneryAt(self).setTrapped(true);
-
-						player.updateGradient(-1);
-					}
-					else
-					{
-						if(action == Action.DRAW)
-						{
-							player.updateGradient(o.gradient());
-
-							board.setSceneryAt(self, new Desert());
-						}
-						else if(action == Action.HARVEST)
-						{
-							player.updateGradient(o.gradient());
-
-							board.setSceneryAt(self, new Desert());
-						}
-						else if(action == Action.CUT)
-						{
-							player.updateGradient(o.gradient());
-
-							board.setSceneryAt(self, new Meadow(false));
-						}
-
-						if(!toUpdate.containsKey(self))
-						{
-							toUpdate.put(self, new LinkedList<>());
-						}
-
 						LinkedList<Update> pending = toUpdate.get(self);
 						Update update = new Update(o.getFakeSymbol(), 50);
 						pending.addFirst(update);
+
+						mapUpdated = false;
 					}
 				}
 
@@ -143,13 +109,6 @@ public class Game implements Runnable
 			}
 
 			int height = board.getHeight(), width = board.getWidth();
-
-			for(Player player : clones)
-			{
-				addPlayer(player, board.randomPos());
-			}
-
-			dead.forEach(this::removePlayer);
 
 			int randomTileUpdates = (int) ((height * width) * 0.2F);
 
@@ -175,7 +134,19 @@ public class Game implements Runnable
 				}
 			}
 
-			Platform.runLater(() -> controller.update(Collections.unmodifiableMap(players)));
+			Platform.runLater(() -> controller.update(Collections.unmodifiableList(players)));
+
+			for(Player player : clones)
+			{
+				addPlayer(player);
+			}
+
+			dead.forEach(this::removePlayer);
+
+			if(players.isEmpty())
+			{
+				stop();
+			}
 
 			ticks++;
 
@@ -198,7 +169,7 @@ public class Game implements Runnable
 		int id = board.getSceneryAt(board.torusPos(origin.getX() + state, origin.getY() + o.getFakeSymbol())).getSymbol();
 		Action action = Action.byId(id);
 
-		return matches(action, o) ? action : Action.MIGRATE;
+		return matches(action, o) ? action : Action.byId(0);
 	}
 
 	private boolean matches(Action action, Scenery scenery)
@@ -206,51 +177,51 @@ public class Game implements Runnable
 		return action.getId() <= 0 || scenery.getFakeSymbol() == 1 && (action.getId() == 1 || action.getId() == 2) || scenery.getFakeSymbol() == 2 && (action.getId() == 3 || action.getId() == 4) || scenery.getFakeSymbol() == 3 && (action.getId() == 5 || action.getId() == 6);
 	}
 
-	private void addPlayer(Player player, Position position)
+	private void addPlayer(Player player)
 	{
-		players.put(player, position);
+		players.add(player);
 	}
 
-	public Set<Player> getPlayers()
+	public List<Player> getPlayers()
 	{
-		return Collections.unmodifiableSet(players.keySet());
+		return Collections.unmodifiableList(players);
 	}
 
 	public Player getPlayer(Position position)
 	{
-		for(Map.Entry<Player, Position> entry : players.entrySet())
+		for(Player player : players)
 		{
-			if(entry.getValue().equals(position))
+			if(player.getPosition().equals(position))
 			{
-				return entry.getKey();
+				return player;
 			}
 		}
 
 		return null;
 	}
 
-	public Position getPosition(Player player)
+	private void removePlayer(Player player)
 	{
-		return players.get(player);
-	}
-
-	private Position removePlayer(Player player)
-	{
+		players.remove(player);
 		player.die();
-
-		Position position = players.remove(player);
 
 		if(players.isEmpty())
 		{
 			stop();
 		}
-
-		return position;
 	}
 
 	private boolean hasPlayerOn(Position position)
 	{
-		return players.values().contains(position);
+		for(Player player : players)
+		{
+			if(player.getPosition().equals(position))
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public void pause()
@@ -301,5 +272,7 @@ public class Game implements Runnable
 	public void setSceneryAt(Position position, Scenery scenery)
 	{
 		board.setSceneryAt(position, scenery);
+
+		mapUpdated = true;
 	}
 }
