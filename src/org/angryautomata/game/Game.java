@@ -76,6 +76,10 @@ public class Game implements Runnable
 				Position self = entry.getValue();
 
 				Scenery o = board.getSceneryAt(self);
+				Scenery n = board.getSceneryAt(board.torusPos((self.getX()),self.getY()-1));
+				Scenery e = board.getSceneryAt(board.torusPos(self.getX()+1,self.getY()));
+				Scenery s = board.getSceneryAt(board.torusPos(self.getX(),self.getY()+1));
+				Scenery w = board.getSceneryAt(board.torusPos(self.getX()-1,self.getY()));
 
 				if(player.canClone())
 				{
@@ -83,15 +87,33 @@ public class Game implements Runnable
 				}
 				else
 				{
-					Action action = action(player, o);
+					Action action = action(player, o, n, e, s, w);
 
 					if(action == Action.NOTHING)
 					{
 						player.updateGradient(-1);
 					}
-					else if(action == Action.MIGRATE)
+					else if(action == Action.NORD )
 					{
-						entry.setValue(board.torusPos(self.getX() + (int) (Math.random() * 3.0D) - 1, self.getY() + (int) (Math.random() * 3.0D) - 1));
+						entry.setValue(board.torusPos(self.getX() , self.getY() - 1));
+
+						player.updateGradient(-1);
+					}
+					else if(action == Action.SUD )
+					{
+						entry.setValue(board.torusPos(self.getX() , self.getY() + 1));
+
+						player.updateGradient(-1);
+					}
+					else if(action == Action.EAST )
+					{
+						entry.setValue(board.torusPos(self.getX() +1, self.getY()));
+
+						player.updateGradient(-1);
+					}
+					else if(action == Action.WEST )
+					{
+						entry.setValue(board.torusPos(self.getX() -1, self.getY()));
 
 						player.updateGradient(-1);
 					}
@@ -205,18 +227,25 @@ public class Game implements Runnable
 				int symbole = e.getSymbol();
 				int symbols = s.getSymbol();
 				int symbolw = w.getSymbol();
-				List l = new ArrayList<Direction>();
+				List l = new ArrayList<Action>();
 
-				if (symboln!=0) { l.add(NORD);}
-				if (symbols!=0) { l.add(SUD);}
-				if (symbole!=0) { l.add(EST);}
-				if (symbolw!=0) { l.add(WEST);}
-
-				return Action.MIGRATE(l.get((int) (Math.random() * l.size())));
+				if (symboln!=0) { l.add(Action.byId(-1));}
+				if (symbols!=0) { l.add(Action.byId(-2));}
+				if (symbole!=0) { l.add(Action.byId(-3));}
+				if (symbolw!=0) { l.add(Action.byId(-4));}
+				if(l.isEmpty())
+				{
+					l.add(Action.byId(-1));
+					l.add(Action.byId(-2));
+					l.add(Action.byId(-3));
+					l.add(Action.byId(-4));
+				}
+				return (Action) l.get((int) (Math.random() * l.size()));
 			}
 
 		return matches(action, o) ? action : Action.NOTHING;
 	}
+
 
 	private boolean matches(Action action, Scenery scenery)
 	{

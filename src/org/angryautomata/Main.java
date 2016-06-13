@@ -39,10 +39,10 @@ public class Main extends Application
 			}
 		}
 		int[][] actions2 = {
-				{0, 0, 0, 0, 0, 0, 0, 0, 0}, // desert
-				{2, 1, 2, 1, 2, 2, 1, 2, 2}, // lac
-				{4, 4, 3, 4, 3, 4, 4, 3, 4}, // prairie
-				{5, 6, 5, 5, 6, 5, 6, 5, 5}  // foret
+				{0}, // desert
+				{2}, // lac
+				{4}, // prairie
+				{6}  // foret
 		};
 
 		Automaton automaton2 = new Automaton(transitions2, actions2, origin2, "TonAutomateNase", 159);
