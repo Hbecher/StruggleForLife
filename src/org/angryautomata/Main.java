@@ -27,17 +27,15 @@ public class Main extends Application
 				{6}  // foret
 		};
 
-		Automaton automaton1 = new Automaton(transitions1, actions1, origin1, "MonAutomateCool", 255);
+		Automaton automaton1 = new Automaton(transitions1, actions1, origin1, "MonAutomateCool", 0XFFFF0000);
 
 		Position origin2 = new Position(3, 6);
-		int[][] transitions2 = new int[4][1];
-		for(int i = 0; i < 4; i++)
-		{
-			for(int j = 0; j < 1; j++)
-			{
-				transitions2[i][j] = (int) (Math.random() * 1);
-			}
-		}
+		int[][] transitions2 = {
+				{0},
+				{0},
+				{0},
+				{0}
+		};
 		int[][] actions2 = {
 				{0}, // desert
 				{2}, // lac
@@ -45,7 +43,7 @@ public class Main extends Application
 				{6}  // foret
 		};
 
-		Automaton automaton2 = new Automaton(transitions2, actions2, origin2, "TonAutomateNase", 159);
+		Automaton automaton2 = new Automaton(transitions2, actions2, origin2, "TonAutomateNase", 0XFF800000);
 
 		Board board = new Board(32, 16);
 

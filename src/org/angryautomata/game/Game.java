@@ -13,12 +13,11 @@ public class Game implements Runnable
 	private final Board board;
 	private final Automaton[] automata;
 	private final List<Player> players = new ArrayList<>();
-	private final Map<Position, LinkedList<Update>> toUpdate = new HashMap<>();
+	private final Map<Position, ArrayList<Update>> toUpdate = new HashMap<>();
 	private final Controller controller;
 	private long tickSpeed = 200L;
 	private boolean pause = true, run = true;
 	private int ticks = 0;
-	private boolean mapUpdated = false;
 
 	public Game(Controller controller, Board board, Automaton... automata)
 	{
@@ -72,10 +71,6 @@ public class Game implements Runnable
 				Position self = player.getPosition();
 
 				Scenery o = board.getSceneryAt(self);
-				Scenery n = board.getSceneryAt(board.torusPos((self.getX()), self.getY() - 1));
-				Scenery e = board.getSceneryAt(board.torusPos(self.getX() + 1, self.getY()));
-				Scenery s = board.getSceneryAt(board.torusPos(self.getX(), self.getY() + 1));
-				Scenery w = board.getSceneryAt(board.torusPos(self.getX() - 1, self.getY()));
 
 				if(player.canClone())
 				{
@@ -83,22 +78,20 @@ public class Game implements Runnable
 				}
 				else
 				{
-					Action action = action(player, o, n, e, s, w);
+					Action action = action(player, o);
 
 					action.execute(this, player);
 
-					if(!toUpdate.containsKey(self))
+					if(action.changesMap())
 					{
-						toUpdate.put(self, new LinkedList<>());
-					}
+						if(!toUpdate.containsKey(self))
+						{
+							toUpdate.put(self, new ArrayList<>());
+						}
 
-					if(mapUpdated)
-					{
-						LinkedList<Update> pending = toUpdate.get(self);
-						Update update = new Update(o.getFakeSymbol(), 50);
-						pending.addFirst(update);
-
-						mapUpdated = false;
+						ArrayList<Update> pending = toUpdate.get(self);
+						Update update = new Update(o.getFakeSymbol(), 0);
+						pending.add(0, update);
 					}
 				}
 
@@ -114,29 +107,25 @@ public class Game implements Runnable
 
 			int height = board.getHeight(), width = board.getWidth();
 
-			for(Player player : clones)
-			{
-				addPlayer(player);
-			}
-
 			dead.forEach(this::removePlayer);
+			clones.forEach(this::addPlayer);
 
 			int randomTileUpdates = (int) ((height * width) * 0.2F);
 
 			for(int k = 0; k < randomTileUpdates; k++)
 			{
 				Position rnd = board.randomPos();
-				LinkedList<Update> updates = toUpdate.get(rnd);
+				ArrayList<Update> updates = toUpdate.get(rnd);
 
 				if(updates != null && !updates.isEmpty())
 				{
-					Update update = updates.peekLast();
+					Update update = updates.get(0);
 
 					if(update.canUpdate())
 					{
 						board.setSceneryAt(rnd, Scenery.byId(update.getPrevSymbol()));
 
-						updates.removeLast();
+						updates.remove(0);
 					}
 					else
 					{
@@ -168,42 +157,56 @@ public class Game implements Runnable
 		}
 	}
 
-	private Action action(Player player, Scenery o, Scenery n, Scenery e, Scenery s, Scenery w)
+	private Action action(Player player, Scenery o)
 	{
-		// balise - consommer ou pieger - migrer selon autour
 		int state = player.getState();
 		Position origin = player.getAutomaton().getOrigin();
 		int id = board.getSceneryAt(board.torusPos(origin.getX() + state, origin.getY() + o.getFakeSymbol())).getSymbol();
-		Action action = Action.byId(id);
 
-		if(id == 0)
+		if(id == 0 || player.isInTrouble())
 		{
-			int symboln = n.getSymbol();
-			int symbole = e.getSymbol();
-			int symbols = s.getSymbol();
-			int symbolw = w.getSymbol();
-			List l = new ArrayList<Action>();
+			Action[] actions = Action.byId(0);
+			Position self = player.getPosition();
+			Position n = board.torusPos(self.getX(), self.getY() - 1);
+			Position e = board.torusPos(self.getX() + 1, self.getY());
+			Position s = board.torusPos(self.getX(), self.getY() + 1);
+			Position w = board.torusPos(self.getX() - 1, self.getY());
+			List<Action> l = new ArrayList<>();
 
-				if (symboln!=0 && board.torusPos(origin.getX(), origin.getY()-1)!=player.precedent()) { l.add(Action.byId(-1));}
-				if (symbols!=0 && board.torusPos(origin.getX(), origin.getY()+1)!=player.precedent()) { l.add(Action.byId(-2));}
-				if (symbole!=0 && board.torusPos(origin.getX()+1, origin.getY())!=player.precedent()) { l.add(Action.byId(-3));}
-				if (symbolw!=0 && board.torusPos(origin.getX()-1, origin.getY())!=player.precedent()) { l.add(Action.byId(-4));}
-				if(l.isEmpty())
-				{
-					l.add(Action.byId(-1));
-					l.add(Action.byId(-2));
-					l.add(Action.byId(-3));
-					l.add(Action.byId(-4));
-				}
-				return (Action) l.get((int) (Math.random() * l.size()));
+			if(board.getSceneryAt(n).getSymbol() != 0 && !player.comesFrom(n))
+			{
+				l.add(actions[0]);
+			}
+			if(board.getSceneryAt(e).getSymbol() != 0 && !player.comesFrom(e))
+			{
+				l.add(actions[1]);
+			}
+			if(board.getSceneryAt(s).getSymbol() != 0 && !player.comesFrom(s))
+			{
+				l.add(actions[2]);
+			}
+			if(board.getSceneryAt(w).getSymbol() != 0 && !player.comesFrom(w))
+			{
+				l.add(actions[3]);
+			}
+			if(l.isEmpty())
+			{
+				Collections.addAll(l, actions);
 			}
 
-		return matches(action, o) ? action : Action.byId(-1);
+			return l.get((int) (Math.random() * l.size()));
+		}
+
+		Action[] actions = Action.byId(id);
+		Action action = actions[(int) (Math.random() * actions.length)];
+		boolean matches = matches(action.getId(), o.getFakeSymbol());
+
+		return matches ? action : Action.byId(-1)[0];
 	}
 
-	private boolean matches(Action action, Scenery scenery)
+	private boolean matches(int id, int symbol)
 	{
-		return action.getId() <= 0 || scenery.getFakeSymbol() == 1 && (action.getId() == 1 || action.getId() == 2) || scenery.getFakeSymbol() == 2 && (action.getId() == 3 || action.getId() == 4) || scenery.getFakeSymbol() == 3 && (action.getId() == 5 || action.getId() == 6);
+		return id <= 0 || symbol == 1 && (id == 1 || id == 2) || symbol == 2 && (id == 3 || id == 4) || symbol == 3 && (id == 5 || id == 6);
 	}
 
 	private void addPlayer(Player player)
@@ -301,7 +304,10 @@ public class Game implements Runnable
 	public void setSceneryAt(Position position, Scenery scenery)
 	{
 		board.setSceneryAt(position, scenery);
+	}
 
-		mapUpdated = true;
+	public Position torusPos(int x, int y)
+	{
+		return board.torusPos(x, y);
 	}
 }

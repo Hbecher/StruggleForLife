@@ -10,7 +10,7 @@ public class Player
 	private final int team;
 	private int state;
 	private int gradient = initGradient;
-	private Position position, prev = null;
+	private Position position, prev;
 
 	public Player(Automaton automaton, int state, int team, Position position)
 	{
@@ -18,6 +18,7 @@ public class Player
 		this.state = state;
 		this.team = team;
 		this.position = position;
+		prev = position;
 
 		automaton.addPlayer(this);
 	}
@@ -56,12 +57,6 @@ public class Player
 	{
 		prev = this.position;
 		this.position = position;
-	}
-
-	public void move(int relX, int relY)
-	{
-		prev = position;
-		position = new Position(position.getX() + relX, position.getY() + relY);
 	}
 
 	public Color getColor()
@@ -114,9 +109,8 @@ public class Player
 		return x >= originX && x < originX + automaton.numberOfStates() && y >= originY && y < originY + Scenery.sceneries();
 	}
 
-	public Position precedent()
+	public boolean comesFrom(Position position)
 	{
-		return prev;
+		return prev.equals(position);
 	}
-
 }

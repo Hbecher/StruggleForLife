@@ -5,18 +5,16 @@ import java.util.List;
 
 import org.angryautomata.game.Game;
 import org.angryautomata.game.Player;
-import org.angryautomata.game.Position;
-import org.angryautomata.game.scenery.Scenery;
 
 public abstract class Action
 {
-	private static final List<Action> ACTIONS = new ArrayList<>();
-
 	private final int id;
+	private final boolean changesMap;
 
-	public Action(int id)
+	protected Action(int id, boolean changesMap)
 	{
 		this.id = id;
+		this.changesMap = changesMap;
 	}
 
 	public int getId()
@@ -24,109 +22,86 @@ public abstract class Action
 		return id;
 	}
 
+	public boolean changesMap()
+	{
+		return changesMap;
+	}
+
 	public abstract void execute(Game game, Player player);
 
-	public static Action byId(int id)
+	public static Action[] byId(int id)
 	{
-		for(Action action : ACTIONS)
+		List<Action> actions = new ArrayList<>();
+
+		switch(id)
 		{
-			if(action.getId() == id)
+			case -1:
 			{
-				return action;
+				actions.add(new Nothing());
+
+				break;
+			}
+
+			case 0:
+			{
+				actions.add(new MoveNorth());
+				actions.add(new MoveEast());
+				actions.add(new MoveSouth());
+				actions.add(new MoveWest());
+
+				break;
+			}
+
+			case 1:
+			{
+				actions.add(new TrapLake());
+
+				break;
+			}
+
+			case 2:
+			{
+				actions.add(new ConsumeLake());
+
+				break;
+			}
+
+			case 3:
+			{
+				actions.add(new TrapMeadow());
+
+				break;
+			}
+
+			case 4:
+			{
+				actions.add(new ConsumeMeadow());
+
+				break;
+			}
+
+			case 5:
+			{
+				actions.add(new TrapForest());
+
+				break;
+			}
+
+			case 6:
+			{
+				actions.add(new ConsumeForest());
+
+				break;
+			}
+
+			default:
+			{
+				actions.add(new Nothing());
+
+				break;
 			}
 		}
 
-		return null;
-	}
-
-	public static void register(Action action)
-	{
-		ACTIONS.add(action);
-	}
-
-	static
-	{
-		register(new Action(-1)
-		{
-			@Override
-			public void execute(Game game, Player player, Object... params)
-			{
-				player.updateGradient(-1);
-			}
-		});
-		register(new Action(0)
-		{
-			@Override
-			public void execute(Game game, Player player)
-			{
-				Scenery n = board.getSceneryAt(board.torusPos((self.getX()), self.getY() - 1));
-				Scenery e = board.getSceneryAt(board.torusPos(self.getX() + 1, self.getY()));
-				Scenery s = board.getSceneryAt(board.torusPos(self.getX(), self.getY() + 1));
-				Scenery w = board.getSceneryAt(board.torusPos(self.getX() - 1, self.getY()));;
-				int relX, relY;
-
-				switch(dir)
-				{
-					case NORTH:
-						relX = 0;
-						relY = -1;
-						break;
-					case EAST:
-						relX = 1;
-						relY = 0;
-						break;
-					case SOUTH:
-						relX = 0;
-						relY = 1;
-						break;
-					case WEST:
-						relX = -1;
-						relY = 0;
-						break;
-					default:
-						relX = relY = 0;
-						break;
-				}
-
-				player.move(relX, relY);
-				player.updateGradient(-1);
-			}
-		});
-		register(new Action(1)
-		{
-			@Override
-			public void execute(Game game, Player player)
-			{
-				Position self = player.getPosition();
-
-				//game.setSceneryAt(self, new Lake());
-
-				player.updateGradient(-1);
-			}
-		});
-		register(new Action(2)
-		{
-			@Override
-			public void execute(Game game, Player player)
-			{
-				Position self = player.getPosition();
-
-				game.setSceneryAt(self, game.getSceneryAt(self).getTrapped());
-
-				player.updateGradient(-1);
-			}
-		});
-		register(new Action(1)
-		{
-			@Override
-			public void execute(Game game, Player player)
-			{
-				Position self = player.getPosition();
-
-				game.setSceneryAt(self, game.getSceneryAt(self).getTrapped());
-
-				player.updateGradient(-1);
-			}
-		});
+		return actions.toArray(new Action[0]);
 	}
 }

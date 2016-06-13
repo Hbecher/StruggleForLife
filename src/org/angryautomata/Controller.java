@@ -87,7 +87,7 @@ public class Controller extends VBox
 
 			for(int j = 0; j < width; j++)
 			{
-				gc.setFill(ofScenery(game.getSceneryAt(new Position(j, i))));
+				gc.setFill(ofScenery(game.getSceneryAt(game.torusPos(j, i))));
 				gc.fillRect(posToCanvas(j), d, squareSize, squareSize);
 			}
 		}
@@ -100,6 +100,18 @@ public class Controller extends VBox
 
 			gc.setFill(player.getColor());
 			gc.fillRect(posToCanvas(position.getX()) + offset, posToCanvas(position.getY()) + offset, length, length);
+		}
+
+		gc.setFill(Color.BLACK);
+
+		for(int i = 0; i < height; i++)
+		{
+			double d = posToCanvas(i) + 8.0D;
+
+			for(int j = 0; j < width; j++)
+			{
+				gc.fillText(Integer.toString(game.getSceneryAt(game.torusPos(j, i)).getSymbol()), posToCanvas(j) + 4.0D, d);
+			}
 		}
 	}
 
