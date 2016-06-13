@@ -30,19 +30,19 @@ public class Main extends Application
 		Automaton automaton1 = new Automaton(transitions1, actions1, origin1, "MonAutomateCool", 255);
 
 		Position origin2 = new Position(3, 6);
-		int[][] transitions2 = new int[4][9];
+		int[][] transitions2 = new int[4][1];
 		for(int i = 0; i < 4; i++)
 		{
-			for(int j = 0; j < 9; j++)
+			for(int j = 0; j < 1; j++)
 			{
-				transitions2[i][j] = (int) (Math.random() * 9);
+				transitions2[i][j] = (int) (Math.random() * 1);
 			}
 		}
 		int[][] actions2 = {
-				{0, 0, 0, 0, 0, 0, 0, 0, 0}, // desert
-				{2, 1, 2, 1, 2, 2, 1, 2, 2}, // lac
-				{4, 4, 3, 4, 3, 4, 4, 3, 4}, // prairie
-				{5, 6, 5, 5, 6, 5, 6, 5, 5}  // foret
+				{0}, // desert
+				{2}, // lac
+				{4}, // prairie
+				{6}  // foret
 		};
 
 		Automaton automaton2 = new Automaton(transitions2, actions2, origin2, "TonAutomateNase", 159);
