@@ -1,5 +1,7 @@
 package org.angryautomata.xml;
-
+/**
+*Cecile FU 03/06 . Update 13/06 pour un automate dans chaque XML
+*/
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
@@ -19,11 +21,14 @@ public class XMLReader
 	{
 
 		// long lasting =System.currentTimeMillis();
-
+                Scanner in = new Scanner(System.in);
+                System.out.print("输入查询信息：");
 		try
 		{
 
-			File f = new File("essai.xml");
+			String filename = in.next();
+	        
+	                File f = new File(filename);
 
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
@@ -44,15 +49,13 @@ public class XMLReader
 			//NodeList sym = doc.getElementsByTagName("nb_symbole_max");/////////////////////////
 
 			//get root element
-			Element rootElement = doc.getDocumentElement();
-			//traverse child elements
-			NodeList nodes = rootElement.getChildNodes();
-			Node nbauto = nodes.item(0);
-			Node maxetat = nodes.item(1);
-			Node maxsym = nodes.item(2);
-			int nb_automate = Integer.valueOf(nbauto.getNodeValue());
-			int nb_etat_max = Integer.valueOf(maxetat.getNodeValue());
-			int nb_symbole_max = Integer.valueOf(maxsym.getNodeValue());
+			Element maxsym=doc.getElementById("nb_symbole_max");
+			//int nb_symbole_max = Integer.valueOf(maxsym.getNodeValue());
+			int nb_symbole_max = 0;
+			if(maxsym.getNodeValue()!=null && !"".equals(maxsym.getNodeValue()) && !"null".equals(maxsym.getNodeValue())&&!"".equals(maxsym.getNodeValue().trim()))
+			{
+				nb_symbole_max = Integer.parseInt(maxsym.getNodeValue());
+		        }
 			NodeList list = doc.getElementsByTagName("automate");
 
 			//ici, on attend des Attributes dans AUTOMATE.遍历该集合，显示结合中的元素及其子元素的名字
