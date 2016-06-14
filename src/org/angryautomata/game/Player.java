@@ -11,6 +11,7 @@ public class Player
 	private int state;
 	private int gradient = initGradient;
 	private Position position, prev;
+	private boolean hasPlayed = false;
 
 	public Player(Automaton automaton, int state, int team, Position position)
 	{
@@ -122,5 +123,15 @@ public class Player
 	public boolean isOnSameTeamAs(Player player)
 	{
 		return team == player.getTeam();
+	}
+
+	public boolean hasPlayed()
+	{
+		return hasPlayed;
+	}
+
+	public void played(boolean hasPlayed)
+	{
+		this.hasPlayed = hasPlayed;
 	}
 }

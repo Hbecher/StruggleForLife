@@ -85,7 +85,10 @@ public class Game implements Runnable
 			tickThread.setDaemon(true);
 			tickThread.start();
 
-			players.stream().filter(this::hasPlayerOnSelf).forEach(player ->
+			List<Player> clones = new ArrayList<>(), dead = new ArrayList<>();
+			List<Position> screenUpdates = new ArrayList<>();
+
+			players.stream().filter(player -> !player.hasPlayed() && hasPlayerOnSelf(player)).forEach(player ->
 			{
 				List<Player> p = getPlayers(player.getPosition());
 				p.sort(GRADIENT_COMPARATOR);
@@ -96,18 +99,26 @@ public class Game implements Runnable
 				{
 					if(!ppp.isOnSameTeamAs(pp))
 					{
-						ppp.updateGradient(-10);
-						pp.updateGradient(10);
+						int grad = 10;
+
+						ppp.updateGradient(-grad);
+						pp.updateGradient(grad);
 					}
 
-					ppp.moveTo(ppp.getPreviousPosition());
+					if(ppp.isDead())
+					{
+						dead.add(ppp);
+					}
+					else
+					{
+						ppp.moveTo(ppp.getPreviousPosition());
+					}
+
+					ppp.played(true);
 				}
 			});
 
-			List<Player> clones = new ArrayList<>(), dead = new ArrayList<>();
-			List<Position> screenUpdates = new ArrayList<>();
-
-			for(Player player : players)
+			players.stream().filter(player -> !player.hasPlayed()).forEach(player ->
 			{
 				Position self = player.getPosition();
 				Scenery o = board.getSceneryAt(self);
@@ -146,11 +157,16 @@ public class Game implements Runnable
 				{
 					player.nextState(o.getFakeSymbol());
 				}
-			}
+
+				player.played(true);
+			});
 
 			int height = board.getHeight(), width = board.getWidth();
 
 			dead.forEach(this::removePlayer);
+
+			players.forEach(player -> player.played(false));
+
 			clones.forEach(this::addPlayer);
 
 			if(players.isEmpty())
@@ -343,6 +359,11 @@ public class Game implements Runnable
 	public int ticks()
 	{
 		return ticks;
+	}
+
+	public void setTickSpeed(long tickSpeed)
+	{
+		this.tickSpeed = tickSpeed;
 	}
 
 	public int getWidth()
