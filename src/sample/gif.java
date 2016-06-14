@@ -2,15 +2,18 @@ package sample;/**
  * Created by Vincent on 09/06/2016.
  */
 
+import java.io.File;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.scene.*;
-
+import javafx.util.Duration;
 
 
 public class gif extends Application {
@@ -40,6 +43,23 @@ public class gif extends Application {
         Image pop75 = new Image("sample/pop75.gif");
         Image pop95 = new Image("sample/pop95.gif");
         Image dead = new Image("sample/dead.gif");
+        Image pop_death = new Image("sample/pop_death.gif");
+        Image popsplitda = new Image("sample/split_d_a.gif");
+        Image popsplitdb = new Image("sample/split_d_b.gif");
+        Image popsplitga = new Image("sample/split_g_a.gif");
+        Image popsplitgb = new Image("sample/split_g_b.gif");
+        Image popsplitha = new Image("sample/split_h_a.gif");
+        Image popsplithb = new Image("sample/split_h_b.gif");
+        Image popsplitba = new Image("sample/split_b_a.gif");
+        Image popsplitbb = new Image("sample/split_b_b.gif");
+        Image popmigrateda = new Image("sample/migrate_d_a.gif");
+        Image popmigratedb = new Image("sample/migrate_d_b.gif");
+        Image popmigratega = new Image("sample/migrate_g_a.gif");
+        Image popmigrategb = new Image("sample/migrate_g_b.gif");
+        Image popmigrateha = new Image("sample/migrate_h_a.gif");
+        Image popmigratehb = new Image("sample/migrate_h_b.gif");
+        Image popmigrateba = new Image("sample/migrate_b_a.gif");
+        Image popmigratebb = new Image("sample/migrate_b_b.gif");
 
 
         // pour remplir la gridpane des images ( symboles )
@@ -61,39 +81,118 @@ public class gif extends Application {
             }
         }
 
+        // jouer du son !!!!! à développer
+        final File file = new File("C:\\data\\audio\\chanaz\\RockMétal\\Tool\\10000 Days (2006)\\01 Vicarious.mp3");
+        final Media media = new Media(file.toURI().toString());
+        final MediaPlayer mediaPlayer = new MediaPlayer(media);
+        Duration seconds = new Duration(3000000.0);
+        mediaPlayer.setStopTime(seconds);
+        mediaPlayer.play();
+
+        // afficher l'animation d'extinction de population  par dessus les images des cases
+        ImageView imageViewpopdead1 = new ImageView(pop_death);
+        gridpane.add(imageViewpopdead1, 10, 8);
+
+        // afficher l'animation de split de population  par dessus les images des cases
+        ImageView imageViewpopsplitda = new ImageView(popsplitda);
+        gridpane.add(imageViewpopsplitda, 10, 9);
+        ImageView imageViewpopsplitdb = new ImageView(popsplitdb);
+        gridpane.add(imageViewpopsplitdb, 11, 9);
+        ImageView imageViewpopsplitga = new ImageView(popsplitga);
+        gridpane.add(imageViewpopsplitga, 10, 10);
+        ImageView imageViewpopsplitgb = new ImageView(popsplitgb);
+        gridpane.add(imageViewpopsplitgb, 9, 10);
+        ImageView imageViewpopsplitha = new ImageView(popsplitha);
+        gridpane.add(imageViewpopsplitha, 10, 12);
+        ImageView imageViewpopsplithb = new ImageView(popsplithb);
+        gridpane.add(imageViewpopsplithb, 10, 11);
+        ImageView imageViewpopsplitba = new ImageView(popsplitba);
+        gridpane.add(imageViewpopsplitba, 10, 13);
+        ImageView imageViewpopsplitbb = new ImageView(popsplitbb);
+        gridpane.add(imageViewpopsplitbb, 11, 14);
+
         // afficher 1 tombe par dessus les images des cases
         ImageView imageViewdead1 = new ImageView(dead);
-        gridpane.add(imageViewdead1, 0, 3);
+        gridpane.add(imageViewdead1, 6, 7);
         ImageView imageViewdead2 = new ImageView(dead);
-        gridpane.add(imageViewdead2, 8, 8);
+        gridpane.add(imageViewdead2, 10, 7);
 
-        // afficher 3 pièges par dessus les images des cases et des tombes
+        // afficher 1 piège par dessus les images des cases et des tombes
         ImageView imageViewalter1 = new ImageView(trapped);
-        gridpane.add(imageViewalter1, 15, 8);
+        gridpane.add(imageViewalter1, 8, 6);
         ImageView imageViewalter2 = new ImageView(trapped);
-        gridpane.add(imageViewalter2, 14, 9);
+        gridpane.add(imageViewalter2, 8, 5);
         ImageView imageViewalter3 = new ImageView(trapped);
-        gridpane.add(imageViewalter3, 13, 10);
+        gridpane.add(imageViewalter3, 8, 4);
         ImageView imageViewalter4 = new ImageView(trapped);
-        gridpane.add(imageViewalter4, 8, 8);
+        gridpane.add(imageViewalter4, 10, 7);
+        ImageView imageViewalter5 = new ImageView(trapped);
+        gridpane.add(imageViewalter5, 10, 6);
+        ImageView imageViewalter6 = new ImageView(trapped);
+        gridpane.add(imageViewalter6, 10, 5);
+        ImageView imageViewalter7 = new ImageView(trapped);
+        gridpane.add(imageViewalter7, 10, 4);
+        ImageView imageViewalter8 = new ImageView(trapped);
+        gridpane.add(imageViewalter8, 10, 2);
 
-        // afficher 4 populations ( personnage ) par dessus ce qui prècède
+        // afficher l'animation de migration de population  par dessus ce qui prècède
+        ImageView imageViewpopmigrateda = new ImageView(popmigrateda);
+        gridpane.add(imageViewpopmigrateda, 6, 6);
+        ImageView imageViewpopmigratedb = new ImageView(popmigratedb);
+        gridpane.add(imageViewpopmigratedb, 7, 6);
+        ImageView imageViewpopmigratega = new ImageView(popmigratega);
+        gridpane.add(imageViewpopmigratega, 6, 5);
+        ImageView imageViewpopmigrategb = new ImageView(popmigrategb);
+        gridpane.add(imageViewpopmigrategb, 5, 5);
+       ImageView imageViewpopmigrateha = new ImageView(popmigrateha);
+        gridpane.add(imageViewpopmigrateha, 6, 2);
+        ImageView imageViewpopmigratehb = new ImageView(popmigratehb);
+        gridpane.add(imageViewpopmigratehb, 6, 1);
+       ImageView imageViewpopmigrateba = new ImageView(popmigrateba);
+        gridpane.add(imageViewpopmigrateba, 6, 7);
+        ImageView imageViewpopmigratebb = new ImageView(popmigratebb);
+        gridpane.add(imageViewpopmigratebb, 6, 8);
+
+        // afficher 1 population ( selon gradient ) par dessus ce qui prècède
         ImageView imageViewpop = new ImageView(pop5);
-        gridpane.add(imageViewpop, 5, 6);
+        gridpane.add(imageViewpop, 6, 6);
         ImageView imageViewpop2 = new ImageView(pop25);
-        gridpane.add(imageViewpop2, 12, 12);
+        gridpane.add(imageViewpop2, 6, 5);
         ImageView imageViewpop3 = new ImageView(pop50);
-        gridpane.add(imageViewpop3, 10, 13);
+        gridpane.add(imageViewpop3, 6, 4);
         ImageView imageViewpop4 = new ImageView(pop75);
-        gridpane.add(imageViewpop4, 16, 7);
+        gridpane.add(imageViewpop4, 6, 3);
         ImageView imageViewpop5 = new ImageView(pop95);
-        gridpane.add(imageViewpop5, 8, 8);
+        gridpane.add(imageViewpop5, 6, 2);
+        ImageView imageViewpop6 = new ImageView(pop5);
+        gridpane.add(imageViewpop6, 10, 6);
+        ImageView imageViewpop7 = new ImageView(pop25);
+        gridpane.add(imageViewpop7, 10, 5);
+        ImageView imageViewpop8 = new ImageView(pop50);
+        gridpane.add(imageViewpop8, 10, 4);
+        ImageView imageViewpop9 = new ImageView(pop75);
+        gridpane.add(imageViewpop9, 10, 3);
+        ImageView imageViewpop10 = new ImageView(pop95);
+        gridpane.add(imageViewpop10, 10, 2);
 
-        // afficher une action invlalide par dessus ce qui prècède
+        /*
+        // afficher 1 split de populations par dessus ce qui prècède (nécéssite 2 node adjacent !!!)
+        ImageView imageViewpopsplit1 = new ImageView(popsplit);
+        gridpane.setColumnSpan(imageViewpopsplit1, 2);
+        gridpane.add(imageViewpopsplit1, 31, 1);
+        */
+
+        // afficher une action invalide par dessus ce qui prècède
         ImageView imageViewinvalid1 = new ImageView(invalid);
-        gridpane.add(imageViewinvalid1, 16, 7);
+        gridpane.add(imageViewinvalid1, 10, 2);
         ImageView imageViewinvalid2 = new ImageView(invalid);
-        gridpane.add(imageViewinvalid2, 8, 8);
+        gridpane.add(imageViewinvalid2, 10, 3);
+        ImageView imageViewinvalid3 = new ImageView(invalid);
+        gridpane.add(imageViewinvalid3, 10, 4);
+        ImageView imageViewinvalid4 = new ImageView(invalid);
+        gridpane.add(imageViewinvalid4, 10, 5);
+        ImageView imageViewinvalid5 = new ImageView(invalid);
+        gridpane.add(imageViewinvalid5, 10, 6);
 
         // Display image on screen
         root.getChildren().add(gridpane);
