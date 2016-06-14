@@ -117,6 +117,7 @@ public class Game implements Runnable
 					}
 
 					ppp.played(true);
+					tileUpdates.add(ppp.getPosition());
 				}
 			});
 
@@ -152,6 +153,7 @@ public class Game implements Runnable
 				{
 					dead.add(player);
 
+					tileUpdates.add(player.getPreviousPosition());
 					tileUpdates.add(player.getPosition());
 				}
 				else
@@ -161,6 +163,17 @@ public class Game implements Runnable
 
 				player.played(true);
 			});
+
+			dead.forEach(this::removePlayer);
+			players.forEach(player -> player.played(false));
+			clones.forEach(this::addPlayer);
+			dead.clear();
+			clones.clear();
+
+			if(players.isEmpty())
+			{
+				stop();
+			}
 
 			int height = board.getHeight(), width = board.getWidth();
 
@@ -187,17 +200,6 @@ public class Game implements Runnable
 						update.countDown();
 					}
 				}
-			}
-
-			dead.forEach(this::removePlayer);
-			players.forEach(player -> player.played(false));
-			clones.forEach(this::addPlayer);
-			dead.clear();
-			clones.clear();
-
-			if(players.isEmpty())
-			{
-				stop();
 			}
 
 			ticks++;
