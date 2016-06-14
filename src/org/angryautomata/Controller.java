@@ -11,6 +11,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
@@ -29,6 +30,8 @@ public class Controller extends BorderPane
 	public MenuItem eraseMarker;
 	@FXML
 	public MenuItem putMarker;
+	@FXML
+	public Slider tickSpeed;
 	private Game game = null;
 	@FXML
 	public Button pauseOrResumeButton, stopButton, quitButton;
@@ -70,6 +73,25 @@ public class Controller extends BorderPane
 		screen.setWidth(width);
 		overlay.setHeight(height);
 		overlay.setWidth(width);
+
+		tickSpeed.valueProperty().addListener((observable, oldValue, newValue) ->
+		{
+			if(newValue.intValue() == 0)
+			{
+				game.pause();
+			}
+			else
+			{
+				if(oldValue.intValue() == 0)
+				{
+					game.resume();
+				}
+
+				game.setTickSpeed(1000L / newValue.longValue());
+
+				System.out.println(newValue.longValue());
+			}
+		});
 
 		init();
 	}
@@ -225,7 +247,5 @@ public class Controller extends BorderPane
 	public void onOverlayMouseClicked(MouseEvent e)
 	{
 		double x = e.getX(), y = e.getY();
-
-
 	}
 }
