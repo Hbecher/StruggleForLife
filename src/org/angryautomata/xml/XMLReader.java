@@ -2,13 +2,14 @@ package org.angryautomata.xml;
 /**
 *Cecile FU 03/06 . Update 13/06 pour un automate dans chaque XML
 */
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
+import java.util.Scanner;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 //import java.util.*;

@@ -2,6 +2,8 @@ package org.angryautomata.game;
 
 
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import org.angryautomata.Controller;
@@ -10,6 +12,8 @@ import org.angryautomata.game.scenery.Scenery;
 
 public class Game implements Runnable
 {
+	private static final Comparator<Player> GRADIENT_COMPARATOR = (o1, o2) -> o2.getGradient() - o1.getGradient();
+
 	private final Board board;
 	private final Automaton[] automata;
 	private final List<Player> players = new ArrayList<>();
@@ -18,6 +22,7 @@ public class Game implements Runnable
 	private long tickSpeed = 200L;
 	private boolean pause = true, run = true;
 	private int ticks = 0;
+	private CountDownLatch tickWait = new CountDownLatch(1);
 
 	public Game(Controller controller, Board board, Automaton... automata)
 	{
@@ -51,6 +56,8 @@ public class Game implements Runnable
 	@Override
 	public void run()
 	{
+		Platform.runLater(() -> controller.update(getPlayers()));
+
 		while(run)
 		{
 			while(pause)
@@ -64,12 +71,46 @@ public class Game implements Runnable
 				}
 			}
 
+			Thread tickThread = new Thread(() ->
+			{
+				try
+				{
+					Thread.sleep(tickSpeed);
+				}
+				catch(InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+
+				tickWait.countDown();
+			}, "Tick thread");
+			tickThread.setDaemon(true);
+			tickThread.start();
+
+			players.stream().filter(this::hasPlayerOnSelf).forEach(player ->
+			{
+				List<Player> p = getPlayers(player.getPosition());
+				p.sort(GRADIENT_COMPARATOR);
+				Player pp = p.get(0);
+				p.remove(0);
+
+				for(Player ppp : p)
+				{
+					if(!ppp.isOnSameTeamAs(pp))
+					{
+						ppp.updateGradient(-10);
+						pp.updateGradient(10);
+					}
+
+					ppp.moveTo(ppp.getPreviousPosition());
+				}
+			});
+
 			List<Player> clones = new ArrayList<>(), dead = new ArrayList<>();
 
 			for(Player player : players)
 			{
 				Position self = player.getPosition();
-
 				Scenery o = board.getSceneryAt(self);
 
 				if(player.canClone())
@@ -90,7 +131,7 @@ public class Game implements Runnable
 						}
 
 						ArrayList<Update> pending = toUpdate.get(self);
-						Update update = new Update(o.getFakeSymbol(), 0);
+						Update update = new Update(o.getFakeSymbol(), 20);
 						pending.add(0, update);
 					}
 				}
@@ -109,6 +150,11 @@ public class Game implements Runnable
 
 			dead.forEach(this::removePlayer);
 			clones.forEach(this::addPlayer);
+
+			if(players.isEmpty())
+			{
+				stop();
+			}
 
 			int randomTileUpdates = (int) ((height * width) * 0.2F);
 
@@ -134,26 +180,20 @@ public class Game implements Runnable
 				}
 			}
 
-			Platform.runLater(() -> controller.update(Collections.unmodifiableList(players)));
-
-			clones.forEach(this::addPlayer);
-			dead.forEach(this::removePlayer);
-
-			if(players.isEmpty())
-			{
-				stop();
-			}
-
 			ticks++;
+
+			Platform.runLater(() -> controller.update(getPlayers()));
 
 			try
 			{
-				Thread.sleep(tickSpeed);
+				tickWait.await();
 			}
 			catch(InterruptedException e)
 			{
 				e.printStackTrace();
 			}
+
+			tickWait = new CountDownLatch(1);
 		}
 	}
 
@@ -163,32 +203,38 @@ public class Game implements Runnable
 		Position origin = player.getAutomaton().getOrigin();
 		int id = board.getSceneryAt(board.torusPos(origin.getX() + state, origin.getY() + o.getFakeSymbol())).getSymbol();
 
-		if(id == 0 || player.isInTrouble())
+		if(id == 0 || player.isOnOwnAutomaton())
 		{
 			Action[] actions = Action.byId(0);
+
 			Position self = player.getPosition();
 			Position n = board.torusPos(self.getX(), self.getY() - 1);
 			Position e = board.torusPos(self.getX() + 1, self.getY());
 			Position s = board.torusPos(self.getX(), self.getY() + 1);
 			Position w = board.torusPos(self.getX() - 1, self.getY());
+
 			List<Action> l = new ArrayList<>();
 
-			if(board.getSceneryAt(n).getSymbol() != 0 && !player.comesFrom(n))
+			if(canMoveTo(player, n))
 			{
 				l.add(actions[0]);
 			}
-			if(board.getSceneryAt(e).getSymbol() != 0 && !player.comesFrom(e))
+
+			if(canMoveTo(player, e))
 			{
 				l.add(actions[1]);
 			}
-			if(board.getSceneryAt(s).getSymbol() != 0 && !player.comesFrom(s))
+
+			if(canMoveTo(player, s))
 			{
 				l.add(actions[2]);
 			}
-			if(board.getSceneryAt(w).getSymbol() != 0 && !player.comesFrom(w))
+
+			if(canMoveTo(player, w))
 			{
 				l.add(actions[3]);
 			}
+
 			if(l.isEmpty())
 			{
 				Collections.addAll(l, actions);
@@ -199,14 +245,25 @@ public class Game implements Runnable
 
 		Action[] actions = Action.byId(id);
 		Action action = actions[(int) (Math.random() * actions.length)];
-		boolean matches = matches(action.getId(), o.getFakeSymbol());
+		boolean matches = matches(action, o);
 
 		return matches ? action : Action.byId(-1)[0];
 	}
 
-	private boolean matches(int id, int symbol)
+	private boolean matches(Action action, Scenery scenery)
 	{
-		return id <= 0 || symbol == 1 && (id == 1 || id == 2) || symbol == 2 && (id == 3 || id == 4) || symbol == 3 && (id == 5 || id == 6);
+		int id = action.getId();
+		int[] validActions = scenery.getValidActions();
+
+		for(int validId : validActions)
+		{
+			if(validId == id)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private void addPlayer(Player player)
@@ -219,17 +276,9 @@ public class Game implements Runnable
 		return Collections.unmodifiableList(players);
 	}
 
-	public Player getPlayer(Position position)
+	public List<Player> getPlayers(Position position)
 	{
-		for(Player player : players)
-		{
-			if(player.getPosition().equals(position))
-			{
-				return player;
-			}
-		}
-
-		return null;
+		return players.stream().filter(player -> player.getPosition().equals(position)).collect(Collectors.toList());
 	}
 
 	private void removePlayer(Player player)
@@ -243,17 +292,24 @@ public class Game implements Runnable
 		}
 	}
 
-	private boolean hasPlayerOn(Position position)
+	private boolean hasPlayerOnSelf(Player player)
 	{
-		for(Player player : players)
+		Position self = player.getPosition();
+
+		for(Player p : players)
 		{
-			if(player.getPosition().equals(position))
+			if(p.getPosition().equals(self) && p != player)
 			{
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	private boolean canMoveTo(Player player, Position position)
+	{
+		return board.getSceneryAt(position).getSymbol() != 0 && !player.comesFrom(position);
 	}
 
 	public void pause()

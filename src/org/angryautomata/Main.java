@@ -27,7 +27,7 @@ public class Main extends Application
 				{6}  // foret
 		};
 
-		Automaton automaton1 = new Automaton(transitions1, actions1, origin1, "MonAutomateCool", 0XFFFF0000);
+		Automaton automaton1 = new Automaton(transitions1, actions1, origin1, "MonAutomateCool", 0XFFBF0D0D);
 
 		Position origin2 = new Position(3, 6);
 		int[][] transitions2 = {
@@ -43,12 +43,28 @@ public class Main extends Application
 				{6}  // foret
 		};
 
-		Automaton automaton2 = new Automaton(transitions2, actions2, origin2, "TonAutomateNase", 0XFF800000);
+		Automaton automaton2 = new Automaton(transitions2, actions2, origin2, "TonAutomateNase", 0XFF916012);
 
-		Board board = new Board(32, 16);
+		Position origin3 = new Position(7, 12);
+		int[][] transitions3 = {
+				{0},
+				{0},
+				{0},
+				{0}
+		};
+		int[][] actions3 = {
+				{0}, // desert
+				{2}, // lac
+				{4}, // prairie
+				{6}  // foret
+		};
+
+		Automaton automaton3 = new Automaton(transitions3, actions3, origin3, "SonAutomateMeh", 0XFFF4C0FF);
+
+		Board board = new Board(64, 64);
 
 		Controller root = new Controller();
-		Game game = new Game(root, board, automaton1, automaton2);
+		Game game = new Game(root, board, automaton1, automaton2, automaton3);
 		root.setGame(game);
 
 		primaryStage.setTitle("Struggle for Life");
@@ -56,7 +72,7 @@ public class Main extends Application
 		primaryStage.setScene(new Scene(root));
 		primaryStage.show();
 
-		Thread gameThread = new Thread(game);
+		Thread gameThread = new Thread(game, "Main game loop thread");
 		gameThread.setDaemon(true);
 		gameThread.start();
 	}

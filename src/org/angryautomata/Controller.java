@@ -50,8 +50,8 @@ public class Controller extends VBox
 	{
 		this.game = game;
 
-		canvas.setHeight((game.getHeight() + 0.5D) * squareSize + 1.0D);
-		canvas.setWidth((game.getWidth() + 0.5D) * squareSize + 1.0D);
+		canvas.setHeight((squareSize + 1) * game.getHeight() + 1);
+		canvas.setWidth((squareSize + 1) * game.getWidth() + 1);
 	}
 
 	public Canvas getCanvas()
@@ -106,7 +106,7 @@ public class Controller extends VBox
 
 		for(int i = 0; i < height; i++)
 		{
-			double d = posToCanvas(i) + 8.0D;
+			double d = posToCanvas(i) + 12.0D;
 
 			for(int j = 0; j < width; j++)
 			{

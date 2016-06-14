@@ -4,10 +4,9 @@
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ScrollBar?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.effect.InnerShadow?>
-<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -22,24 +21,23 @@
             </font>
         </Text>
         <Separator prefWidth="0.0" />
-      <BorderPane>
-         <center>
-               <Canvas fx:id="canvas" nodeOrientation="INHERIT">
-                   <cursor>
-                       <Cursor fx:constant="CROSSHAIR" />
-                   </cursor>
-               <effect>
-                  <InnerShadow />
-               </effect>
-               </Canvas>
-         </center>
-         <bottom>
-            <ScrollBar BorderPane.alignment="CENTER" />
-         </bottom>
-         <right>
-            <ScrollBar orientation="VERTICAL" BorderPane.alignment="CENTER" />
-         </right>
-      </BorderPane>
+      <HBox>
+         <children>
+            <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="ALWAYS" minViewportHeight="529.0" minViewportWidth="519.0" prefViewportHeight="529.0" prefViewportWidth="519.0" vbarPolicy="ALWAYS">
+               <content>
+                     <Canvas fx:id="canvas" nodeOrientation="INHERIT">
+                         <cursor>
+                             <Cursor fx:constant="CROSSHAIR" />
+                         </cursor>
+                     <effect>
+                        <InnerShadow />
+                     </effect>
+                     </Canvas>
+               </content>
+            </ScrollPane>
+            <Separator orientation="VERTICAL" />
+         </children>
+      </HBox>
         <Separator layoutX="18.0" layoutY="62.0" prefWidth="0.0" />
         <HBox alignment="CENTER" spacing="8.0" style="-fx-border-color: gray;">
             <Button fx:id="pauseOrResumeButton" mnemonicParsing="false" onAction="#pauseOrResumeGame" text="Lancer" />

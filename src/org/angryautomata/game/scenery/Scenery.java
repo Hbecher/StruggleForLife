@@ -93,4 +93,9 @@ public class Scenery
 	{
 		this.trapped = trapped;
 	}
+
+	public int[] getValidActions()
+	{
+		return validActions;
+	}
 }
