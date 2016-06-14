@@ -56,8 +56,6 @@ public class Game implements Runnable
 	@Override
 	public void run()
 	{
-		Platform.runLater(() -> controller.update(getPlayers()));
-
 		while(run)
 		{
 			while(pause)
@@ -107,6 +105,7 @@ public class Game implements Runnable
 			});
 
 			List<Player> clones = new ArrayList<>(), dead = new ArrayList<>();
+			List<Position> screenUpdates = new ArrayList<>();
 
 			for(Player player : players)
 			{
@@ -133,6 +132,8 @@ public class Game implements Runnable
 						ArrayList<Update> pending = toUpdate.get(self);
 						Update update = new Update(o.getFakeSymbol(), 20);
 						pending.add(0, update);
+
+						screenUpdates.add(self);
 					}
 				}
 
@@ -161,17 +162,18 @@ public class Game implements Runnable
 			for(int k = 0; k < randomTileUpdates; k++)
 			{
 				Position rnd = board.randomPos();
-				ArrayList<Update> updates = toUpdate.get(rnd);
+				ArrayList<Update> tileUpdates = toUpdate.get(rnd);
 
-				if(updates != null && !updates.isEmpty())
+				if(tileUpdates != null && !tileUpdates.isEmpty())
 				{
-					Update update = updates.get(0);
+					Update update = tileUpdates.get(0);
 
 					if(update.canUpdate())
 					{
 						board.setSceneryAt(rnd, Scenery.byId(update.getPrevSymbol()));
 
-						updates.remove(0);
+						tileUpdates.remove(0);
+						screenUpdates.add(rnd);
 					}
 					else
 					{
@@ -182,7 +184,7 @@ public class Game implements Runnable
 
 			ticks++;
 
-			Platform.runLater(() -> controller.update(getPlayers()));
+			Platform.runLater(() -> controller.update(getPlayers(), screenUpdates));
 
 			try
 			{
