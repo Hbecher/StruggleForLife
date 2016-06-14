@@ -10,7 +10,7 @@ public class ConsumeForest extends Action
 {
 	public ConsumeForest()
 	{
-		super(6, true);
+		super(6);
 	}
 
 	@Override
@@ -21,5 +21,17 @@ public class ConsumeForest extends Action
 
 		game.setSceneryAt(self, new Meadow(false));
 		player.updateGradient(scenery.getGradient());
+	}
+
+	@Override
+	public boolean updatesMap()
+	{
+		return true;
+	}
+
+	@Override
+	public boolean updatesPosition()
+	{
+		return false;
 	}
 }

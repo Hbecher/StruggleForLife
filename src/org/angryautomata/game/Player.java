@@ -11,6 +11,7 @@ public class Player
 	private int state;
 	private int gradient = initGradient;
 	private Position position, prev;
+	private boolean hasPlayed = false;
 
 	public Player(Automaton automaton, int state, int team, Position position)
 	{
@@ -51,6 +52,11 @@ public class Player
 	public Position getPosition()
 	{
 		return position;
+	}
+
+	public Position getPreviousPosition()
+	{
+		return prev;
 	}
 
 	public void moveTo(Position position)
@@ -100,7 +106,7 @@ public class Player
 		automaton.removePlayer(this);
 	}
 
-	public boolean isInTrouble()
+	public boolean isOnOwnAutomaton()
 	{
 		Position origin = automaton.getOrigin();
 		int originX = origin.getX(), originY = origin.getY();
@@ -112,5 +118,20 @@ public class Player
 	public boolean comesFrom(Position position)
 	{
 		return prev.equals(position);
+	}
+
+	public boolean isOnSameTeamAs(Player player)
+	{
+		return team == player.getTeam();
+	}
+
+	public boolean hasPlayed()
+	{
+		return hasPlayed;
+	}
+
+	public void played(boolean hasPlayed)
+	{
+		this.hasPlayed = hasPlayed;
 	}
 }

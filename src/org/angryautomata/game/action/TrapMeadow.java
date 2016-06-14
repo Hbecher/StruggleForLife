@@ -8,7 +8,7 @@ public class TrapMeadow extends Action
 {
 	public TrapMeadow()
 	{
-		super(3, true);
+		super(3);
 	}
 
 	@Override
@@ -18,5 +18,17 @@ public class TrapMeadow extends Action
 
 		game.getSceneryAt(self).setTrapped(true);
 		player.updateGradient(-1);
+	}
+
+	@Override
+	public boolean updatesMap()
+	{
+		return true;
+	}
+
+	@Override
+	public boolean updatesPosition()
+	{
+		return false;
 	}
 }
