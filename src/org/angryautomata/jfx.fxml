@@ -41,7 +41,7 @@
             <HBox spacing="8.0">
                 <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="ALWAYS" minViewportHeight="529.0" minViewportWidth="529.0" pannable="true" prefViewportHeight="529.0" prefViewportWidth="529.0" vbarPolicy="ALWAYS">
                     <StackPane>
-                  <Canvas fx:id="overlay" layoutX="275.0" layoutY="275.0" nodeOrientation="INHERIT">
+                  <Canvas fx:id="overlay" layoutX="275.0" layoutY="275.0" nodeOrientation="INHERIT" onMouseClicked="#onOverlayMouseClicked">
                      <cursor>
                         <Cursor fx:constant="CROSSHAIR" />
                      </cursor>

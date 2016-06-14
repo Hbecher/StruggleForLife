@@ -140,6 +140,7 @@ public class Game implements Runnable
 				if(player.isDead())
 				{
 					dead.add(player);
+					screenUpdates.add(self);
 				}
 				else
 				{

@@ -11,6 +11,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -134,6 +135,11 @@ public class Controller extends BorderPane
 		return pos * (squareSize + 1.0D) + 1.0D;
 	}
 
+	private int canvasToPos(double pos)
+	{
+		return (int) ((pos - 1.0D) / (squareSize + 1.0D));
+	}
+
 	private Color ofScenery(Scenery scenery)
 	{
 		switch(scenery.getFakeSymbol())
@@ -212,6 +218,14 @@ public class Controller extends BorderPane
 	@FXML
 	public void showAutomata(ActionEvent e)
 	{
+
+	}
+
+	@FXML
+	public void onOverlayMouseClicked(MouseEvent e)
+	{
+		double x = e.getX(), y = e.getY();
+
 
 	}
 }
