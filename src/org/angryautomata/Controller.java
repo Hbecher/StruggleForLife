@@ -88,8 +88,6 @@ public class Controller extends BorderPane
 				}
 
 				game.setTickSpeed(1000L / newValue.longValue());
-
-				System.out.println(newValue.longValue());
 			}
 		});
 
@@ -128,11 +126,11 @@ public class Controller extends BorderPane
 		}
 	}
 
-	public void update(final List<Player> players, final List<Position> updates)
+	public void update(final List<Player> players, final List<Position> tiles)
 	{
 		final GraphicsContext gc = screen.getGraphicsContext2D();
 
-		for(Position position : updates)
+		for(Position position : tiles)
 		{
 			gc.setFill(ofScenery(game.getSceneryAt(position)));
 			gc.fillRect(posToCanvas(position.getX()), posToCanvas(position.getY()), squareSize, squareSize);
@@ -142,10 +140,18 @@ public class Controller extends BorderPane
 		{
 			Position position = player.getPosition(), previous = player.getPreviousPosition();
 
-			double x = player.getGradient() * 0.12D + 4.0D, length = 2 * x, offset = squareSize / 2.0D - x;
-
 			gc.setFill(ofScenery(game.getSceneryAt(previous)));
 			gc.fillRect(posToCanvas(previous.getX()), posToCanvas(previous.getY()), squareSize, squareSize);
+
+			gc.setFill(ofScenery(game.getSceneryAt(position)));
+			gc.fillRect(posToCanvas(position.getX()), posToCanvas(position.getY()), squareSize, squareSize);
+		}
+
+		for(Player player : players)
+		{
+			Position position = player.getPosition();
+
+			double x = player.getGradient() * 0.12D + 4.0D, length = 2 * x, offset = squareSize / 2.0D - x;
 
 			gc.setFill(player.getColor());
 			gc.fillRect(posToCanvas(position.getX()) + offset, posToCanvas(position.getY()) + offset, length, length);

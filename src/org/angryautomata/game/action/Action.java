@@ -9,12 +9,10 @@ import org.angryautomata.game.Player;
 public abstract class Action
 {
 	private final int id;
-	private final boolean changesMap;
 
-	protected Action(int id, boolean changesMap)
+	protected Action(int id)
 	{
 		this.id = id;
-		this.changesMap = changesMap;
 	}
 
 	public int getId()
@@ -22,12 +20,11 @@ public abstract class Action
 		return id;
 	}
 
-	public boolean changesMap()
-	{
-		return changesMap;
-	}
-
 	public abstract void execute(Game game, Player player);
+
+	public abstract boolean updatesMap();
+
+	public abstract boolean updatesPosition();
 
 	public static Action[] byId(int id)
 	{

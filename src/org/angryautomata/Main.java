@@ -59,7 +59,7 @@ public class Main extends Application
 				{6}  // foret
 		};
 
-		Automaton automaton3 = new Automaton(transitions3, actions3, origin3, "SonAutomateMeh", 0XFFF4C0FF);
+		Automaton automaton3 = new Automaton(transitions3, actions3, origin3, "SonAutomateMeh", 0XFFFF00FF);
 
 		Board board = new Board(64, 64);
 

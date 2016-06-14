@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javafx.application.Platform;
 import org.angryautomata.Controller;
 import org.angryautomata.game.action.Action;
+import org.angryautomata.game.action.Nothing;
 import org.angryautomata.game.scenery.Scenery;
 
 public class Game implements Runnable
@@ -85,12 +86,13 @@ public class Game implements Runnable
 			tickThread.setDaemon(true);
 			tickThread.start();
 
-			List<Player> clones = new ArrayList<>(), dead = new ArrayList<>();
-			List<Position> screenUpdates = new ArrayList<>();
+			final List<Player> clones = new ArrayList<>(), dead = new ArrayList<>();
+			final List<Position> tileUpdates = new ArrayList<>();
 
 			players.stream().filter(player -> !player.hasPlayed() && hasPlayerOnSelf(player)).forEach(player ->
 			{
-				List<Player> p = getPlayers(player.getPosition());
+				Position self = player.getPosition();
+				List<Player> p = getPlayers(self);
 				p.sort(GRADIENT_COMPARATOR);
 				Player pp = p.get(0);
 				p.remove(0);
@@ -133,7 +135,7 @@ public class Game implements Runnable
 
 					action.execute(this, player);
 
-					if(action.changesMap())
+					if(action.updatesMap())
 					{
 						if(!toUpdate.containsKey(self))
 						{
@@ -143,15 +145,14 @@ public class Game implements Runnable
 						ArrayList<Update> pending = toUpdate.get(self);
 						Update update = new Update(o.getFakeSymbol(), 20);
 						pending.add(0, update);
-
-						screenUpdates.add(self);
 					}
 				}
 
 				if(player.isDead())
 				{
 					dead.add(player);
-					screenUpdates.add(self);
+
+					tileUpdates.add(player.getPosition());
 				}
 				else
 				{
@@ -163,34 +164,23 @@ public class Game implements Runnable
 
 			int height = board.getHeight(), width = board.getWidth();
 
-			dead.forEach(this::removePlayer);
-
-			players.forEach(player -> player.played(false));
-
-			clones.forEach(this::addPlayer);
-
-			if(players.isEmpty())
-			{
-				stop();
-			}
-
 			int randomTileUpdates = (int) ((height * width) * 0.2F);
 
 			for(int k = 0; k < randomTileUpdates; k++)
 			{
 				Position rnd = board.randomPos();
-				ArrayList<Update> tileUpdates = toUpdate.get(rnd);
+				ArrayList<Update> updates = toUpdate.get(rnd);
 
-				if(tileUpdates != null && !tileUpdates.isEmpty())
+				if(updates != null && !updates.isEmpty())
 				{
-					Update update = tileUpdates.get(0);
+					Update update = updates.get(0);
 
 					if(update.canUpdate())
 					{
 						board.setSceneryAt(rnd, Scenery.byId(update.getPrevSymbol()));
 
-						tileUpdates.remove(0);
-						screenUpdates.add(rnd);
+						updates.remove(0);
+						tileUpdates.add(rnd);
 					}
 					else
 					{
@@ -199,9 +189,20 @@ public class Game implements Runnable
 				}
 			}
 
+			dead.forEach(this::removePlayer);
+			players.forEach(player -> player.played(false));
+			clones.forEach(this::addPlayer);
+			dead.clear();
+			clones.clear();
+
+			if(players.isEmpty())
+			{
+				stop();
+			}
+
 			ticks++;
 
-			Platform.runLater(() -> controller.update(getPlayers(), screenUpdates));
+			Platform.runLater(() -> controller.update(getPlayers(), tileUpdates));
 
 			try
 			{
@@ -256,7 +257,25 @@ public class Game implements Runnable
 
 			if(l.isEmpty())
 			{
-				Collections.addAll(l, actions);
+				if(!player.comesFrom(n))
+				{
+					l.add(actions[0]);
+				}
+
+				if(!player.comesFrom(e))
+				{
+					l.add(actions[1]);
+				}
+
+				if(!player.comesFrom(s))
+				{
+					l.add(actions[2]);
+				}
+
+				if(!player.comesFrom(w))
+				{
+					l.add(actions[3]);
+				}
 			}
 
 			return l.get((int) (Math.random() * l.size()));
@@ -266,7 +285,7 @@ public class Game implements Runnable
 		Action action = actions[(int) (Math.random() * actions.length)];
 		boolean matches = matches(action, o);
 
-		return matches ? action : Action.byId(-1)[0];
+		return matches ? action : new Nothing();
 	}
 
 	private boolean matches(Action action, Scenery scenery)
@@ -302,13 +321,9 @@ public class Game implements Runnable
 
 	private void removePlayer(Player player)
 	{
-		players.remove(player);
 		player.die();
 
-		if(players.isEmpty())
-		{
-			stop();
-		}
+		players.remove(player);
 	}
 
 	private boolean hasPlayerOnSelf(Player player)

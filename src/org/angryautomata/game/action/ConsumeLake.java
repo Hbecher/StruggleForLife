@@ -10,7 +10,7 @@ public class ConsumeLake extends Action
 {
 	public ConsumeLake()
 	{
-		super(2, true);
+		super(2);
 	}
 
 	@Override
@@ -21,5 +21,17 @@ public class ConsumeLake extends Action
 
 		game.setSceneryAt(self, new Desert());
 		player.updateGradient(scenery.getGradient());
+	}
+
+	@Override
+	public boolean updatesMap()
+	{
+		return true;
+	}
+
+	@Override
+	public boolean updatesPosition()
+	{
+		return false;
 	}
 }

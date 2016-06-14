@@ -8,7 +8,7 @@ public class TrapForest extends Action
 {
 	public TrapForest()
 	{
-		super(5, false);
+		super(5);
 	}
 
 	@Override
@@ -18,5 +18,17 @@ public class TrapForest extends Action
 
 		game.getSceneryAt(self).setTrapped(true);
 		player.updateGradient(-1);
+	}
+
+	@Override
+	public boolean updatesMap()
+	{
+		return true;
+	}
+
+	@Override
+	public boolean updatesPosition()
+	{
+		return false;
 	}
 }

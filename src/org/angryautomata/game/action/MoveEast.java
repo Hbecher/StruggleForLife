@@ -8,7 +8,7 @@ public class MoveEast extends Action
 {
 	public MoveEast()
 	{
-		super(0, false);
+		super(0);
 	}
 
 	@Override
@@ -17,5 +17,17 @@ public class MoveEast extends Action
 		Position position = player.getPosition();
 		player.moveTo(game.torusPos(position.getX() + 1, position.getY()));
 		player.updateGradient(-1);
+	}
+
+	@Override
+	public boolean updatesMap()
+	{
+		return false;
+	}
+
+	@Override
+	public boolean updatesPosition()
+	{
+		return true;
 	}
 }

@@ -8,7 +8,7 @@ public class TrapLake extends Action
 {
 	public TrapLake()
 	{
-		super(1, false);
+		super(1);
 	}
 
 	@Override
@@ -18,5 +18,17 @@ public class TrapLake extends Action
 
 		game.getSceneryAt(self).setTrapped(true);
 		player.updateGradient(-1);
+	}
+
+	@Override
+	public boolean updatesMap()
+	{
+		return true;
+	}
+
+	@Override
+	public boolean updatesPosition()
+	{
+		return false;
 	}
 }
