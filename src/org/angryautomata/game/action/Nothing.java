@@ -1,7 +1,7 @@
 package org.angryautomata.game.action;
 
 import org.angryautomata.game.Game;
-import org.angryautomata.game.Player;
+import org.angryautomata.game.Population;
 
 public class Nothing extends Action
 {
@@ -11,9 +11,9 @@ public class Nothing extends Action
 	}
 
 	@Override
-	public void execute(Game game, Player player)
+	public void execute(Game game, Population population)
 	{
-		player.updateGradient(-1);
+		population.updateGradient(-1);
 	}
 
 	@Override

@@ -1,7 +1,9 @@
 package org.angryautomata;
 
 import java.io.IOException;
+import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -9,10 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.Slider;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -20,26 +19,28 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.angryautomata.game.Automaton;
 import org.angryautomata.game.Game;
-import org.angryautomata.game.Player;
+import org.angryautomata.game.Population;
 import org.angryautomata.game.Position;
 import org.angryautomata.game.scenery.Scenery;
 
 public class Controller extends BorderPane
 {
-	private final int squareSize = 32;
+	private static final int SQUARE_SIZE = 32;
+
 	@FXML
-	public CheckMenuItem showAutomata;
-	@FXML
-	public MenuItem eraseMarker;
-	@FXML
-	public MenuItem putMarker;
+	public MenuItem putMarker, eraseMarker;
 	@FXML
 	public Slider tickSpeed;
-	private Game game = null;
+	@FXML
+	public ChoiceBox<String> playersBox;
+	@FXML
+	public Label ticksLabel, populationsLabel, totalGradientLabel, meanGradientLabel;
 	@FXML
 	public Button pauseOrResumeButton, stopButton, quitButton;
 	@FXML
-	public Canvas screen, overlay;
+	public Canvas colorCanvas, screen, overlay;
+	private Game game = null;
+	private Position selection = null;
 
 	public Controller()
 	{
@@ -71,7 +72,7 @@ public class Controller extends BorderPane
 
 		this.game = game;
 
-		int height = (squareSize + 1) * game.getHeight() + 1, width = (squareSize + 1) * game.getWidth() + 1;
+		int height = (SQUARE_SIZE + 1) * game.getHeight() + 1, width = (SQUARE_SIZE + 1) * game.getWidth() + 1;
 		screen.setHeight(height);
 		screen.setWidth(width);
 		overlay.setHeight(height);
@@ -79,18 +80,21 @@ public class Controller extends BorderPane
 
 		tickSpeed.valueProperty().addListener((observable, oldValue, newValue) ->
 		{
-			if(newValue.intValue() == 0)
-			{
-				game.pause();
-			}
-			else
-			{
-				if(oldValue.intValue() == 0)
-				{
-					game.resume();
-				}
+			game.setTickSpeed(1000L / newValue.longValue());
+		});
 
-				game.setTickSpeed(1000L / newValue.longValue());
+		playersBox.getItems().clear();
+
+		for(Player player : game.getPlayers())
+		{
+			playersBox.getItems().add(player.getName());
+		}
+
+		playersBox.valueProperty().addListener((observable, oldValue, newValue) ->
+		{
+			if(!newValue.equals(oldValue))
+			{
+				updateData();
 			}
 		});
 
@@ -99,24 +103,24 @@ public class Controller extends BorderPane
 
 	private void init()
 	{
-		final GraphicsContext gc = screen.getGraphicsContext2D();
+		GraphicsContext gc = screen.getGraphicsContext2D();
 		final int height = game.getHeight(), width = game.getWidth();
 
-		gc.clearRect(0.0D, 0.0D, screen.getHeight(), screen.getWidth());
+		gc.clearRect(0.0D, 0.0D, screen.getWidth(), screen.getHeight());
 		gc.setFill(Color.BLACK);
 
-		double t = (squareSize + 1.0D) * width + 1.0D;
+		double d = (SQUARE_SIZE + 1.0D) * width + 1.0D;
 
 		for(int i = 0; i <= height; i++)
 		{
-			gc.fillRect(0.0D, i * (squareSize + 1.0D), t, 1.0D);
+			gc.fillRect(0.0D, i * (SQUARE_SIZE + 1.0D), d, 1.0D);
 		}
 
-		t = (squareSize + 1.0D) * height + 1.0D;
+		d = (SQUARE_SIZE + 1.0D) * height + 1.0D;
 
 		for(int j = 0; j <= width; j++)
 		{
-			gc.fillRect(j * (squareSize + 1.0D), 0.0D, 1.0D, t);
+			gc.fillRect(j * (SQUARE_SIZE + 1.0D), 0.0D, 1.0D, d);
 		}
 
 		for(int i = 0; i < height; i++)
@@ -124,56 +128,66 @@ public class Controller extends BorderPane
 			for(int j = 0; j < width; j++)
 			{
 				gc.setFill(ofScenery(game.getSceneryAt(game.torusPos(j, i))));
-				gc.fillRect(posToCanvas(j), posToCanvas(i), squareSize, squareSize);
+				gc.fillRect(posToCanvas(j), posToCanvas(i), SQUARE_SIZE, SQUARE_SIZE);
 			}
 		}
+
+		updateOverlay();
 	}
 
-	public void update(final List<Player> players, final List<Position> tiles)
+	public void updateScreen(final List<Population> populations, final Deque<Position> tiles, final Map<Player, Position> markers)
 	{
 		final GraphicsContext gc = screen.getGraphicsContext2D();
 
-		for(Position position : tiles)
+		while(!tiles.isEmpty())
 		{
+			Position position = tiles.poll();
+
 			gc.setFill(ofScenery(game.getSceneryAt(position)));
-			gc.fillRect(posToCanvas(position.getX()), posToCanvas(position.getY()), squareSize, squareSize);
+			gc.fillRect(posToCanvas(position.getX()), posToCanvas(position.getY()), SQUARE_SIZE, SQUARE_SIZE);
 		}
 
-		for(Player player : players)
+		for(Population population : populations)
 		{
-			Position position = player.getPosition(), previous = player.getPreviousPosition();
+			Position position = population.getPosition(), previous = population.getPreviousPosition();
 
 			gc.setFill(ofScenery(game.getSceneryAt(previous)));
-			gc.fillRect(posToCanvas(previous.getX()), posToCanvas(previous.getY()), squareSize, squareSize);
+			gc.fillRect(posToCanvas(previous.getX()), posToCanvas(previous.getY()), SQUARE_SIZE, SQUARE_SIZE);
 
 			gc.setFill(ofScenery(game.getSceneryAt(position)));
-			gc.fillRect(posToCanvas(position.getX()), posToCanvas(position.getY()), squareSize, squareSize);
+			gc.fillRect(posToCanvas(position.getX()), posToCanvas(position.getY()), SQUARE_SIZE, SQUARE_SIZE);
 		}
 
-		for(Player player : players)
+		for(Population population : populations)
 		{
-			Position position = player.getPosition();
+			Position position = population.getPosition();
+			int gradient = population.getGradient();
 
-			double x = player.getGradient() * 0.12D + 4.0D, length = 2 * x, offset = squareSize / 2.0D - x;
+			double x = gradient >= Population.GRADIENT_MAX ? SQUARE_SIZE / 4.0D : gradient * 0.12D + 4.0D, length = 2.0D * x, offset = SQUARE_SIZE / 2.0D - x;
 
-			gc.setFill(player.getColor());
+			gc.setFill(population.getColor());
 			gc.fillRect(posToCanvas(position.getX()) + offset, posToCanvas(position.getY()) + offset, length, length);
 		}
 
-		if(showAutomata.isSelected())
+		for(Map.Entry<Player, Position> entry : markers.entrySet())
 		{
-			showAutomata();
+			Position position = entry.getValue();
+
+			gc.setFill(entry.getKey().getColor());
+			gc.fillOval(posToCanvas(position.getX()) + 12.0D, posToCanvas(position.getY()) + 12.0D, 8.0D, 8.0D);
 		}
+
+		updateData();
 	}
 
 	private double posToCanvas(int pos)
 	{
-		return pos * (squareSize + 1.0D) + 1.0D;
+		return pos * (SQUARE_SIZE + 1.0D) + 1.0D;
 	}
 
 	private int canvasToPos(double pos)
 	{
-		return (int) ((pos - 1.0D) / (squareSize + 1.0D));
+		return (int) ((pos - 1.0D) / (SQUARE_SIZE + 1.0D));
 	}
 
 	private Color ofScenery(Scenery scenery)
@@ -207,20 +221,75 @@ public class Controller extends BorderPane
 		}
 	}
 
-	private void showAutomata()
+	private void updateOverlay()
 	{
-		for(Automaton automaton : game.getAutomata())
+		overlay.getGraphicsContext2D().clearRect(0.0D, 0.0D, overlay.getWidth(), overlay.getHeight());
+
+		drawAutomata();
+		drawSelection();
+	}
+
+	private void drawAutomata()
+	{
+		final GraphicsContext gc = overlay.getGraphicsContext2D();
+
+		for(Player player : game.getPlayers())
+		{
+			Automaton automaton = player.getAutomaton();
+			Position origin = automaton.getOrigin();
+			double x = posToCanvas(origin.getX()) - 2.0D, y = posToCanvas(origin.getY()) - 2.0D;
+			double xl = (SQUARE_SIZE + 1.0D) * automaton.numberOfStates(), yl = (SQUARE_SIZE + 1.0D) * Scenery.sceneries();
+
+			gc.setFill(player.getColor());
+			gc.fillRect(x, y, xl + 3.0D, 3.0D);
+			gc.fillRect(x, y, 3.0D, yl + 3.0D);
+			gc.fillRect(x, y + yl, xl + 3.0D, 3.0D);
+			gc.fillRect(x + xl, y, 3.0D, yl + 3.0D);
+		}
+	}
+
+	private void drawSelection()
+	{
+		if(selection != null)
 		{
 			final GraphicsContext gc = overlay.getGraphicsContext2D();
-			double x = posToCanvas(automaton.getOrigin().getX()) - 0.5D, y = posToCanvas(automaton.getOrigin().getY()) - 0.5D;
-			double xx = x + posToCanvas(automaton.numberOfStates()) + 1.0D, yy = y + posToCanvas(Scenery.sceneries()) + 1.0D;
 
-			gc.setFill(automaton.getColor());
+			double x = posToCanvas(selection.getX()) - 0.5D, y = posToCanvas(selection.getY()) - 0.5D;
+			double xx = x + SQUARE_SIZE + 1.0D, yy = y + SQUARE_SIZE + 1.0D;
+
+			gc.setStroke(Color.BLACK);
 			gc.setLineWidth(3.0D);
 			gc.strokeLine(x, y, x, yy);
 			gc.strokeLine(x, y, xx, y);
 			gc.strokeLine(xx, yy, x, yy);
 			gc.strokeLine(xx, yy, xx, y);
+		}
+	}
+
+	private void updateData()
+	{
+		ticksLabel.setText(Integer.toString(game.ticks()));
+
+		Player player = game.getPlayer(playersBox.getValue());
+
+		if(player != null)
+		{
+			final GraphicsContext gc = colorCanvas.getGraphicsContext2D();
+			gc.setFill(player.getColor());
+			gc.fillRect(0.0D, 0.0D, colorCanvas.getWidth(), colorCanvas.getHeight());
+
+			populationsLabel.setText(Integer.toString(player.getPopulations().size()));
+
+			if(player.getPopulations().isEmpty())
+			{
+				totalGradientLabel.setText("N/A");
+				meanGradientLabel.setText("N/A");
+			}
+			else
+			{
+				totalGradientLabel.setText(Integer.toString(player.getTotalGradient()));
+				meanGradientLabel.setText(Integer.toString(player.getMeanGradient()));
+			}
 		}
 	}
 
@@ -259,13 +328,27 @@ public class Controller extends BorderPane
 	@FXML
 	public void putMarker(ActionEvent e)
 	{
-
+		if(selection != null)
+		{
+			game.addMarker(playersBox.getValue(), selection);
+		}
 	}
 
 	@FXML
-	public void eraseMarker(ActionEvent e)
+	public void delMarker(ActionEvent e)
 	{
+		game.delMarker(playersBox.getValue());
+	}
 
+	@FXML
+	public void regenAutomaton(ActionEvent e)
+	{
+		Player player = game.getPlayer(playersBox.getValue());
+
+		if(player != null)
+		{
+			game.regenAutomaton(player);
+		}
 	}
 
 	@FXML
@@ -273,17 +356,14 @@ public class Controller extends BorderPane
 	{
 		if(e.getButton() == MouseButton.SECONDARY || e.getClickCount() > 1)
 		{
-			final GraphicsContext gc = overlay.getGraphicsContext2D();
-			double x = posToCanvas(canvasToPos(e.getX())) - 0.5D, y = posToCanvas(canvasToPos(e.getY())) - 0.5D;
-			double xx = x + squareSize + 1.0D, yy = y + squareSize + 1.0D;
+			selection = new Position(canvasToPos(e.getX()), canvasToPos(e.getY()));
 
-			gc.clearRect(0.0D, 0.0D, overlay.getWidth(), overlay.getHeight());
-			gc.setFill(Color.BLACK);
-			gc.setLineWidth(3.0D);
-			gc.strokeLine(x, y, x, yy);
-			gc.strokeLine(x, y, xx, y);
-			gc.strokeLine(xx, yy, x, yy);
-			gc.strokeLine(xx, yy, xx, y);
+			updateOverlay();
 		}
+	}
+
+	public Position getSelection()
+	{
+		return selection;
 	}
 }

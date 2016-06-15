@@ -19,7 +19,9 @@ public class Board
 		{
 			for(int j = 0; j < width; j++)
 			{
-				terrain[i][j] = Scenery.byId((int) (Math.random() * totalSceneries));
+				Scenery scenery = Scenery.byId((int) (Math.random() * totalSceneries));
+
+				terrain[i][j] = scenery;
 			}
 		}
 	}

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.angryautomata.game.Game;
-import org.angryautomata.game.Player;
+import org.angryautomata.game.Population;
 
 public abstract class Action
 {
@@ -20,7 +20,7 @@ public abstract class Action
 		return id;
 	}
 
-	public abstract void execute(Game game, Player player);
+	public abstract void execute(Game game, Population population);
 
 	public abstract boolean updatesMap();
 
