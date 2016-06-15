@@ -1,32 +1,34 @@
 package org.angryautomata.game;
 
 import javafx.scene.paint.Color;
+import org.angryautomata.Player;
 import org.angryautomata.game.scenery.Scenery;
 
-public class Player
+public class Population
 {
-	private final Automaton automaton;
-	private final int initGradient = 50;
+	public static final int GRADIENT_MIN = 0, GRADIENT_MAX = 100, GRADIENT_INIT = 50;
+
+	private final Player player;
 	private final int team;
 	private int state;
-	private int gradient = initGradient;
+	private int gradient = GRADIENT_INIT;
 	private Position position, prev;
 	private boolean hasPlayed = false;
 
-	public Player(Automaton automaton, int state, int team, Position position)
+	public Population(Player player, int state, int team, Position position)
 	{
-		this.automaton = automaton;
+		this.player = player;
 		this.state = state;
 		this.team = team;
 		this.position = position;
 		prev = position;
 
-		automaton.addPlayer(this);
+		player.addPopulation(this);
 	}
 
-	public Automaton getAutomaton()
+	public Player getPlayer()
 	{
-		return automaton;
+		return player;
 	}
 
 	public int getState()
@@ -36,7 +38,7 @@ public class Player
 
 	public int nextState(int symbol)
 	{
-		return state = automaton.nextState(state, symbol);
+		return state = player.getAutomaton().nextState(state, symbol);
 	}
 
 	public int getGradient()
@@ -67,7 +69,7 @@ public class Player
 
 	public Color getColor()
 	{
-		return automaton.getColor();
+		return player.getColor();
 	}
 
 	public void updateGradient(int grad)
@@ -77,21 +79,21 @@ public class Player
 
 	public boolean isDead()
 	{
-		return gradient <= 0;
+		return gradient <= GRADIENT_MIN;
 	}
 
 	public boolean canClone()
 	{
-		return gradient >= 100;
+		return gradient >= GRADIENT_MAX;
 	}
 
-	public Player createClone()
+	public Population createClone()
 	{
 		Position clonePos = new Position(position.getX() + (int) (Math.random() * 3.0D) - 1, position.getY() + (int) (Math.random() * 3.0D) - 1);
 
-		Player clone = new Player(automaton, 0, team, clonePos);
+		Population clone = new Population(player, 0, team, clonePos);
 
-		clone.updateGradient(-initGradient);
+		clone.updateGradient(-GRADIENT_INIT);
 
 		int splitGradient = gradient / 2;
 
@@ -103,11 +105,12 @@ public class Player
 
 	public void die()
 	{
-		automaton.removePlayer(this);
+		player.removePopulation(this);
 	}
 
 	public boolean isOnOwnAutomaton()
 	{
+		Automaton automaton = player.getAutomaton();
 		Position origin = automaton.getOrigin();
 		int originX = origin.getX(), originY = origin.getY();
 		int x = position.getX(), y = position.getY();
@@ -120,9 +123,9 @@ public class Player
 		return prev.equals(position);
 	}
 
-	public boolean isOnSameTeamAs(Player player)
+	public boolean isOnSameTeamAs(Population population)
 	{
-		return team == player.getTeam();
+		return team == population.getTeam();
 	}
 
 	public boolean hasPlayed()

@@ -1,7 +1,7 @@
 package org.angryautomata.game.action;
 
 import org.angryautomata.game.Game;
-import org.angryautomata.game.Player;
+import org.angryautomata.game.Population;
 import org.angryautomata.game.Position;
 
 public class TrapLake extends Action
@@ -12,12 +12,12 @@ public class TrapLake extends Action
 	}
 
 	@Override
-	public void execute(Game game, Player player)
+	public void execute(Game game, Population population)
 	{
-		Position self = player.getPosition();
+		Position self = population.getPosition();
 
 		game.getSceneryAt(self).setTrapped(true);
-		player.updateGradient(-1);
+		population.updateGradient(-1);
 	}
 
 	@Override

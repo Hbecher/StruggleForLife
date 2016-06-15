@@ -7,50 +7,51 @@ import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import org.angryautomata.Controller;
+import org.angryautomata.Player;
 import org.angryautomata.game.action.Action;
 import org.angryautomata.game.action.Nothing;
 import org.angryautomata.game.scenery.Scenery;
 
 public class Game implements Runnable
 {
-	private static final Comparator<Player> GRADIENT_COMPARATOR = (o1, o2) -> o2.getGradient() - o1.getGradient();
+	private static final Comparator<Population> GRADIENT_COMPARATOR = (o1, o2) -> o2.getGradient() - o1.getGradient();
+	private static final int GRADIENT_COMBAT = 10;
 
 	private final Board board;
-	private final Automaton[] automata;
-	private final List<Player> players = new ArrayList<>();
+	private final Player[] players;
+	private final List<Population> populations = new ArrayList<>();
 	private final Map<Position, ArrayList<Update>> toUpdate = new HashMap<>();
+	private final Map<Player, Position> markers = new HashMap<>();
+	private final Deque<Position> tileUpdates = new ArrayDeque<>();
 	private final Controller controller;
 	private long tickSpeed = 200L;
 	private boolean pause = true, run = true;
 	private int ticks = 0;
 	private CountDownLatch tickWait = new CountDownLatch(1);
 
-	public Game(Controller controller, Board board, Automaton... automata)
+	public Game(Controller controller, Board board, Player... players)
 	{
 		this.controller = controller;
 		this.board = board;
-		this.automata = automata;
+		this.players = players;
 
-		if(automata == null || automata.length < 1)
+		if(players == null || players.length < 1)
 		{
-			throw new RuntimeException("automata cannot be null and must contain at least one automaton");
+			throw new RuntimeException("There must be at least one player");
 		}
 
-		for(Automaton automaton : automata)
+		for(int i = 0; i < players.length; i++)
 		{
+			Player player = players[i];
+			Automaton automaton = player.getAutomaton();
+
+			regenAutomaton(player);
+
 			int actions = Scenery.sceneries(), states = automaton.numberOfStates();
 			Position origin = automaton.getOrigin();
 			int ox = origin.getX(), oy = origin.getY();
 
-			for(int y = 0; y < actions; y++)
-			{
-				for(int x = 0; x < states; x++)
-				{
-					board.setSceneryAt(board.torusPos(x + ox, y + oy), Scenery.byId(automaton.initialAction(x, y)));
-				}
-			}
-
-			addPlayer(new Player(automaton, 0, 0, board.randomPos()));
+			addPopulation(new Population(player, 0, i, board.torusPos(ox + (int) (Math.random() * states), oy + (int) (Math.random() * actions))));
 		}
 	}
 
@@ -63,10 +64,15 @@ public class Game implements Runnable
 			{
 				try
 				{
-					Thread.sleep(10L);
+					Thread.sleep(9L);
 				}
 				catch(InterruptedException ignored)
 				{
+				}
+
+				if(!run)
+				{
+					return;
 				}
 			}
 
@@ -86,56 +92,53 @@ public class Game implements Runnable
 			tickThread.setDaemon(true);
 			tickThread.start();
 
-			final List<Player> clones = new ArrayList<>(), dead = new ArrayList<>();
-			final List<Position> tileUpdates = new ArrayList<>();
+			final List<Population> clones = new ArrayList<>(), dead = new ArrayList<>();
 
-			players.stream().filter(player -> !player.hasPlayed() && hasPlayerOnSelf(player)).forEach(player ->
+			populations.stream().filter(population -> !population.hasPlayed() && hasPopulationOnSelf(population)).forEach(population ->
 			{
-				Position self = player.getPosition();
-				List<Player> p = getPlayers(self);
+				Position self = population.getPosition();
+				List<Population> p = getPopulations(self);
 				p.sort(GRADIENT_COMPARATOR);
-				Player pp = p.get(0);
+				Population pp = p.get(0);
 				p.remove(0);
 
-				for(Player ppp : p)
+				for(Population ppp : p)
 				{
 					if(!ppp.isOnSameTeamAs(pp))
 					{
-						int grad = 10;
-
-						ppp.updateGradient(-grad);
-						pp.updateGradient(grad);
-					}
-
-					// FIXME
-					if(ppp.isDead())
-					{
-						dead.add(ppp);
+						ppp.updateGradient(-GRADIENT_COMBAT);
+						pp.updateGradient(GRADIENT_COMBAT);
 					}
 					else
 					{
 						ppp.moveTo(ppp.getPreviousPosition());
 					}
 
+					if(ppp.isDead())
+					{
+						dead.add(ppp);
+					}
+
 					ppp.played(true);
+
 					tileUpdates.add(ppp.getPosition());
 				}
 			});
 
-			players.stream().filter(player -> !player.hasPlayed()).forEach(player ->
+			populations.stream().filter(population -> !population.hasPlayed()).forEach(population ->
 			{
-				Position self = player.getPosition();
+				Position self = population.getPosition();
 				Scenery o = board.getSceneryAt(self);
 
-				if(player.canClone())
+				if(population.canClone())
 				{
-					clones.add(player.createClone());
+					clones.add(population.createClone());
 				}
 				else
 				{
-					Action action = action(player, o);
+					Action action = action(population, o);
 
-					action.execute(this, player);
+					action.execute(this, population);
 
 					if(action.updatesMap())
 					{
@@ -150,28 +153,29 @@ public class Game implements Runnable
 					}
 				}
 
-				if(player.isDead())
+				if(population.isDead())
 				{
-					dead.add(player);
+					dead.add(population);
 
-					tileUpdates.add(player.getPreviousPosition());
-					tileUpdates.add(player.getPosition());
+					tileUpdates.add(population.getPreviousPosition());
+					tileUpdates.add(population.getPosition());
 				}
 				else
 				{
-					player.nextState(o.getFakeSymbol());
+					population.nextState(o.getFakeSymbol());
 				}
 
-				player.played(true);
+				population.played(true);
 			});
 
-			dead.forEach(this::removePlayer);
-			players.forEach(player -> player.played(false));
-			clones.forEach(this::addPlayer);
+			dead.forEach(this::removePopulation);
+			populations.forEach(population -> population.played(false));
+			clones.forEach(this::addPopulation);
+
 			dead.clear();
 			clones.clear();
 
-			if(players.isEmpty())
+			if(populations.isEmpty())
 			{
 				stop();
 			}
@@ -205,7 +209,7 @@ public class Game implements Runnable
 
 			ticks++;
 
-			Platform.runLater(() -> controller.update(getPlayers(), tileUpdates));
+			Platform.runLater(() -> controller.updateScreen(getPopulations(), tileUpdates, getMarkers()));
 
 			try
 			{
@@ -220,17 +224,17 @@ public class Game implements Runnable
 		}
 	}
 
-	private Action action(Player player, Scenery o)
+	private Action action(Population population, Scenery o)
 	{
-		int state = player.getState();
-		Position origin = player.getAutomaton().getOrigin();
+		int state = population.getState();
+		Position origin = population.getPlayer().getAutomaton().getOrigin();
 		int id = board.getSceneryAt(board.torusPos(origin.getX() + state, origin.getY() + o.getFakeSymbol())).getSymbol();
 
-		if(id == 0 || player.isOnOwnAutomaton())
+		if(id == 0 || population.isOnOwnAutomaton())
 		{
 			Action[] actions = Action.byId(0);
 
-			Position self = player.getPosition();
+			Position self = population.getPosition();
 			Position n = board.torusPos(self.getX(), self.getY() - 1);
 			Position e = board.torusPos(self.getX() + 1, self.getY());
 			Position s = board.torusPos(self.getX(), self.getY() + 1);
@@ -238,44 +242,44 @@ public class Game implements Runnable
 
 			List<Action> l = new ArrayList<>();
 
-			if(canMoveTo(player, n))
+			if(canMoveTo(population, n))
 			{
 				l.add(actions[0]);
 			}
 
-			if(canMoveTo(player, e))
+			if(canMoveTo(population, e))
 			{
 				l.add(actions[1]);
 			}
 
-			if(canMoveTo(player, s))
+			if(canMoveTo(population, s))
 			{
 				l.add(actions[2]);
 			}
 
-			if(canMoveTo(player, w))
+			if(canMoveTo(population, w))
 			{
 				l.add(actions[3]);
 			}
 
 			if(l.isEmpty())
 			{
-				if(!player.comesFrom(n))
+				if(!population.comesFrom(n))
 				{
 					l.add(actions[0]);
 				}
 
-				if(!player.comesFrom(e))
+				if(!population.comesFrom(e))
 				{
 					l.add(actions[1]);
 				}
 
-				if(!player.comesFrom(s))
+				if(!population.comesFrom(s))
 				{
 					l.add(actions[2]);
 				}
 
-				if(!player.comesFrom(w))
+				if(!population.comesFrom(w))
 				{
 					l.add(actions[3]);
 				}
@@ -307,35 +311,35 @@ public class Game implements Runnable
 		return false;
 	}
 
-	private void addPlayer(Player player)
+	private void addPopulation(Population population)
 	{
-		players.add(player);
+		populations.add(population);
 	}
 
-	public List<Player> getPlayers()
+	public List<Population> getPopulations()
 	{
-		return Collections.unmodifiableList(players);
+		return Collections.unmodifiableList(populations);
 	}
 
-	public List<Player> getPlayers(Position position)
+	public List<Population> getPopulations(Position position)
 	{
-		return players.stream().filter(player -> player.getPosition().equals(position)).collect(Collectors.toList());
+		return populations.stream().filter(population -> population.getPosition().equals(position)).collect(Collectors.toList());
 	}
 
-	private void removePlayer(Player player)
+	private void removePopulation(Population population)
 	{
-		player.die();
+		population.die();
 
-		players.remove(player);
+		populations.remove(population);
 	}
 
-	private boolean hasPlayerOnSelf(Player player)
+	private boolean hasPopulationOnSelf(Population population)
 	{
-		Position self = player.getPosition();
+		Position self = population.getPosition();
 
-		for(Player p : players)
+		for(Population p : populations)
 		{
-			if(p.getPosition().equals(self) && p != player)
+			if(p.getPosition().equals(self) && p != population)
 			{
 				return true;
 			}
@@ -344,9 +348,9 @@ public class Game implements Runnable
 		return false;
 	}
 
-	private boolean canMoveTo(Player player, Position position)
+	private boolean canMoveTo(Population population, Position position)
 	{
-		return board.getSceneryAt(position).getSymbol() != 0 && !player.comesFrom(position);
+		return board.getSceneryAt(position).getSymbol() != 0 && !population.comesFrom(position);
 	}
 
 	public void pause()
@@ -409,8 +413,77 @@ public class Game implements Runnable
 		return board.torusPos(x, y);
 	}
 
-	public Automaton[] getAutomata()
+	public Player[] getPlayers()
 	{
-		return automata;
+		return players;
+	}
+
+	public void regenAutomaton(Player player)
+	{
+		Automaton automaton = player.getAutomaton();
+		int actions = Scenery.sceneries(), states = automaton.numberOfStates();
+		Position origin = automaton.getOrigin();
+		int ox = origin.getX(), oy = origin.getY();
+
+		for(int y = 0; y < actions; y++)
+		{
+			for(int x = 0; x < states; x++)
+			{
+				Position position = board.torusPos(x + ox, y + oy);
+
+				board.setSceneryAt(position, Scenery.byId(automaton.initialAction(x, y)));
+				tileUpdates.add(position);
+			}
+		}
+	}
+
+	public void addMarker(String name, Position position)
+	{
+		Player player = getPlayer(name);
+
+		if(player != null)
+		{
+			Position prevMarker = markers.remove(player);
+
+			if(prevMarker != null)
+			{
+				tileUpdates.add(prevMarker);
+			}
+
+			markers.put(player, position);
+		}
+	}
+
+	public void delMarker(String name)
+	{
+		Player player = getPlayer(name);
+
+		if(player != null)
+		{
+			Position position = markers.remove(player);
+
+			if(position != null)
+			{
+				tileUpdates.add(position);
+			}
+		}
+	}
+
+	public Map<Player, Position> getMarkers()
+	{
+		return Collections.unmodifiableMap(markers);
+	}
+
+	public Player getPlayer(String name)
+	{
+		for(Player player : players)
+		{
+			if(player.getName().equals(name))
+			{
+				return player;
+			}
+		}
+
+		return null;
 	}
 }
