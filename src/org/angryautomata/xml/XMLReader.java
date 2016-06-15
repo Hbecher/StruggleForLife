@@ -18,7 +18,7 @@ public class XMLReader
 {
 	static class TestDom4j
 	{
-		public static final String FILENAME_STRING = "./data/essai.xml";
+		public static final String FILENAME_STRING = "./lib/essai.xml";
 
 		public static void main(String[] args)
 		{
