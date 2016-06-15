@@ -10,12 +10,15 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import org.angryautomata.game.Automaton;
 import org.angryautomata.game.Game;
 import org.angryautomata.game.Player;
 import org.angryautomata.game.Position;
@@ -25,7 +28,7 @@ public class Controller extends BorderPane
 {
 	private final int squareSize = 32;
 	@FXML
-	public MenuItem showAutomata;
+	public CheckMenuItem showAutomata;
 	@FXML
 	public MenuItem eraseMarker;
 	@FXML
@@ -156,6 +159,11 @@ public class Controller extends BorderPane
 			gc.setFill(player.getColor());
 			gc.fillRect(posToCanvas(position.getX()) + offset, posToCanvas(position.getY()) + offset, length, length);
 		}
+
+		if(showAutomata.isSelected())
+		{
+			showAutomata();
+		}
 	}
 
 	private double posToCanvas(int pos)
@@ -196,6 +204,23 @@ public class Controller extends BorderPane
 			{
 				return Color.GRAY;
 			}
+		}
+	}
+
+	private void showAutomata()
+	{
+		for(Automaton automaton : game.getAutomata())
+		{
+			final GraphicsContext gc = overlay.getGraphicsContext2D();
+			double x = posToCanvas(automaton.getOrigin().getX()) - 0.5D, y = posToCanvas(automaton.getOrigin().getY()) - 0.5D;
+			double xx = x + posToCanvas(automaton.numberOfStates()) + 1.0D, yy = y + posToCanvas(Scenery.sceneries()) + 1.0D;
+
+			gc.setFill(automaton.getColor());
+			gc.setLineWidth(3.0D);
+			gc.strokeLine(x, y, x, yy);
+			gc.strokeLine(x, y, xx, y);
+			gc.strokeLine(xx, yy, x, yy);
+			gc.strokeLine(xx, yy, xx, y);
 		}
 	}
 
@@ -244,14 +269,21 @@ public class Controller extends BorderPane
 	}
 
 	@FXML
-	public void showAutomata(ActionEvent e)
-	{
-
-	}
-
-	@FXML
 	public void onOverlayMouseClicked(MouseEvent e)
 	{
-		double x = e.getX(), y = e.getY();
+		if(e.getButton() == MouseButton.SECONDARY || e.getClickCount() > 1)
+		{
+			final GraphicsContext gc = overlay.getGraphicsContext2D();
+			double x = posToCanvas(canvasToPos(e.getX())) - 0.5D, y = posToCanvas(canvasToPos(e.getY())) - 0.5D;
+			double xx = x + squareSize + 1.0D, yy = y + squareSize + 1.0D;
+
+			gc.clearRect(0.0D, 0.0D, overlay.getWidth(), overlay.getHeight());
+			gc.setFill(Color.BLACK);
+			gc.setLineWidth(3.0D);
+			gc.strokeLine(x, y, x, yy);
+			gc.strokeLine(x, y, xx, y);
+			gc.strokeLine(xx, yy, x, yy);
+			gc.strokeLine(xx, yy, xx, y);
+		}
 	}
 }

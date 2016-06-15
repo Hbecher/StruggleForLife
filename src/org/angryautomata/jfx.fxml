@@ -4,6 +4,7 @@
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckMenuItem?>
 <?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
@@ -42,14 +43,6 @@
             <HBox spacing="8.0">
                 <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="ALWAYS" minViewportHeight="529.0" minViewportWidth="529.0" pannable="true" prefViewportHeight="529.0" prefViewportWidth="529.0" vbarPolicy="ALWAYS">
                     <StackPane>
-                  <Canvas fx:id="overlay" layoutX="275.0" layoutY="275.0" nodeOrientation="INHERIT" onMouseClicked="#onOverlayMouseClicked">
-                     <cursor>
-                        <Cursor fx:constant="CROSSHAIR" />
-                     </cursor>
-                     <effect>
-                        <InnerShadow />
-                     </effect>
-                  </Canvas>
                         <Canvas fx:id="screen" nodeOrientation="INHERIT">
                             <cursor>
                                 <Cursor fx:constant="CROSSHAIR" />
@@ -58,6 +51,14 @@
                                 <InnerShadow />
                             </effect>
                         </Canvas>
+                  <Canvas fx:id="overlay" layoutX="275.0" layoutY="275.0" nodeOrientation="INHERIT" onMouseClicked="#onOverlayMouseClicked">
+                     <cursor>
+                        <Cursor fx:constant="CROSSHAIR" />
+                     </cursor>
+                     <effect>
+                        <InnerShadow />
+                     </effect>
+                  </Canvas>
                     </StackPane>
                     <contextMenu>
                         <ContextMenu>
@@ -65,7 +66,7 @@
                                 <MenuItem fx:id="putMarker" mnemonicParsing="false" onAction="#putMarker" text="Poser une balise" />
                                 <MenuItem fx:id="eraseMarker" mnemonicParsing="false" onAction="#eraseMarker" text="Retirer la balise" />
                                 <SeparatorMenuItem mnemonicParsing="false" />
-                                <MenuItem fx:id="showAutomata" mnemonicParsing="false" onAction="#showAutomata" text="Voir les automates" />
+                        <CheckMenuItem fx:id="showAutomata" mnemonicParsing="false" text="Voir les automates" />
                             </items>
                         </ContextMenu>
                     </contextMenu>

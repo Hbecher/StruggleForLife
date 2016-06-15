@@ -107,6 +107,7 @@ public class Game implements Runnable
 						pp.updateGradient(grad);
 					}
 
+					// FIXME
 					if(ppp.isDead())
 					{
 						dead.add(ppp);
@@ -144,7 +145,7 @@ public class Game implements Runnable
 						}
 
 						ArrayList<Update> pending = toUpdate.get(self);
-						Update update = new Update(o.getFakeSymbol(), 20);
+						Update update = new Update(o.getFakeSymbol(), 80);
 						pending.add(0, update);
 					}
 				}
@@ -406,5 +407,10 @@ public class Game implements Runnable
 	public Position torusPos(int x, int y)
 	{
 		return board.torusPos(x, y);
+	}
+
+	public Automaton[] getAutomata()
+	{
+		return automata;
 	}
 }

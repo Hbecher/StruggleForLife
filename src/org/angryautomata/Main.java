@@ -11,7 +11,7 @@ import org.angryautomata.game.Position;
 public class Main extends Application
 {
 	@Override
-	public void start(Stage primaryStage) throws Exception
+	public void start(Stage primaryStage)
 	{
 		Position origin1 = new Position(0, 0);
 		int[][] transitions1 = {
@@ -68,7 +68,7 @@ public class Main extends Application
 		root.setGame(game);
 
 		primaryStage.setTitle("Struggle for Life");
-		primaryStage.setResizable(false);
+		primaryStage.setResizable(true);
 		primaryStage.setScene(new Scene(root));
 		primaryStage.show();
 
