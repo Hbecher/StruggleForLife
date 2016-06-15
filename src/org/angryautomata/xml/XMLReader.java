@@ -20,11 +20,17 @@ public class XMLReader
 	{
 		public static final String FILENAME_STRING = "./data/essai.xml";
 
+                public static  int nb_symbole_max = 0;
+	public static  int etat=0;
+	public static  String str[] =null;                ////////////////////////////////////////////
+	public static  int[]transition=new int[4];
+	
 		public static void main(String[] args)
 		{
 			//Scanner in = new Scanner(System.in);
 			//System.out.print("enter the fichier name：");
 			read();
+			System.out.println(" 依test照 " + etat);  
 		}
 
 		private static void read()
@@ -42,6 +48,19 @@ public class XMLReader
 				Element node = document.getRootElement();
 				//travers all nodes                      遍历所有的元素节点
 				listNodes(node);
+	if(node.getName().equals("nb_symbole_max")){
+            	nb_symbole_max=Integer.parseInt(node.getText());
+            }
+            else if(node.getName().equals("nb_etat")){
+            	etat = Integer.valueOf(node.getText());
+            }
+            else if(node.getName().equals("transition")){
+            	str = node.getText().split(",");
+    			for(int k = 0; k < str.length; k++)
+    			{
+    				transition[k] = Integer.parseInt(str[k]);
+    			}
+            }
 
 
 			}
@@ -70,7 +89,7 @@ public class XMLReader
 			}
 
 
-			int nb_symbole_max = 0;
+			/*int nb_symbole_max = 0;
 			if(node.getName().equals("nb_symbole_max"))
 			{
 				nb_symbole_max = Integer.parseInt(node.getText());
@@ -89,7 +108,7 @@ public class XMLReader
 				{
 					transition[k] = Integer.parseInt(str[k]);
 				}
-			}
+			}*/
 
 			// Iterator sous-node                 当前节点下面子节点迭代器
 			Iterator<Element> it = node.elementIterator();
@@ -100,11 +119,11 @@ public class XMLReader
 				Element e = it.next();
 				// Iterator                                   对子节点进行遍历
 				listNodes(e);
-				int[][] transitions = new int[etat * nb_symbole_max][4];
+				/*int[][] transitions = new int[etat * nb_symbole_max][4];
 				for(int j = 0; it.hasNext(); j++)
 				{
 					transitions[j] = transition;
-				}
+				}*/
 			}
 		}
 	}
