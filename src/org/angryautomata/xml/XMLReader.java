@@ -119,12 +119,12 @@ public class XMLReader
 				Element e = it.next();
 				// Iterator                                   对子节点进行遍历
 				listNodes(e);
-				/*int[][] transitions = new int[etat * nb_symbole_max][4];
+			}
+			int[][] transitions = new int[etat * nb_symbole_max][4];
 				for(int j = 0; it.hasNext(); j++)
 				{
 					transitions[j] = transition;
-				}*/
-			}
+				}
 		}
 	}
 
