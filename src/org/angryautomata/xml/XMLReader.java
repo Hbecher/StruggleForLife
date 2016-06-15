@@ -1,6 +1,6 @@
 package org.angryautomata.xml;
 /**
- * Cecile FU 03/06 . Update 13/06 pour un automate dans chaque XML . Version 3.0   14/06/2016
+ * Cecile FU 03/06 . Update 13/06 pour un automate dans chaque XML . Version 3.0   15/06/2016
  */
 
 import java.io.File;
@@ -20,17 +20,11 @@ public class XMLReader
 	{
 		public static final String FILENAME_STRING = "./data/essai.xml";
 
-                public static  int nb_symbole_max = 0;
-	public static  int etat=0;
-	public static  String str[] =null;                ////////////////////////////////////////////
-	public static  int[]transition=new int[4];
-	
 		public static void main(String[] args)
 		{
 			//Scanner in = new Scanner(System.in);
 			//System.out.print("enter the fichier name：");
 			read();
-			System.out.println(" 依test照 " + etat);  
 		}
 
 		private static void read()
@@ -48,21 +42,6 @@ public class XMLReader
 				Element node = document.getRootElement();
 				//travers all nodes                      遍历所有的元素节点
 				listNodes(node);
-	if(node.getName().equals("nb_symbole_max")){
-            	nb_symbole_max=Integer.parseInt(node.getText());
-            }
-            else if(node.getName().equals("nb_etat")){
-            	etat = Integer.valueOf(node.getText());
-            }
-            else if(node.getName().equals("transition")){
-            	str = node.getText().split(",");
-    			for(int k = 0; k < str.length; k++)
-    			{
-    				transition[k] = Integer.parseInt(str[k]);
-    			}
-            }
-
-
 			}
 			catch(Exception e)
 			{
@@ -89,27 +68,32 @@ public class XMLReader
 			}
 
 
-			/*int nb_symbole_max = 0;
-			if(node.getName().equals("nb_symbole_max"))
+			
+
+                        Element maxsym=node.element("nb_symbole_max");
+    	                int nb_symbole_max = 0;
+			if(String.valueOf(maxsym.getStringValue())!=null &&! "".equals(maxsym.getStringValue()) &&!"null".equals(maxsym.getStringValue())&&!"".equals(maxsym.getStringValue().trim()))
 			{
-				nb_symbole_max = Integer.parseInt(node.getText());
+				nb_symbole_max = Integer.parseInt(maxsym.getStringValue());
 			}
-			int etat = 0;
-			if(node.getName().equals("nb_etat"))
+			Element auto =node.element("automate");
+			String joueur = auto.element("nom").getStringValue();
+			int etat = Integer.valueOf(auto.element("nb_etat").getStringValue());
+			int[][] transition = new int[etat * nb_symbole_max][4];
+		
+			Element tran =auto.element("transitions");
+			List<Element> transio = tran.elements("transition");  
+			for(int j = 0; j < transio.size(); j++)
 			{
-				etat = Integer.valueOf(node.getText());
-			}
-			String str[] = null;                ////////////////////////////////////////////   ????!!!!!   ici   ???!!!
-			int[] transition = new int[4];
-			if(node.getName().equals("transition"))
-			{
-				str = node.getText().split(",");
+				String str[] = transio.get(j).getStringValue().split(",");
 				for(int k = 0; k < str.length; k++)
 				{
-					transition[k] = Integer.parseInt(str[k]);
+					transition[j][k] = Integer.parseInt(str[k]);
 				}
-			}*/
 
+			}
+		//System.out.println("依test照:" + transition[3][2]);              //C'est bon tetst!~~~~~
+		
 			// Iterator sous-node                 当前节点下面子节点迭代器
 			Iterator<Element> it = node.elementIterator();
 			// Iterator                                       遍历
@@ -120,11 +104,11 @@ public class XMLReader
 				// Iterator                                   对子节点进行遍历
 				listNodes(e);
 			}
-			int[][] transitions = new int[etat * nb_symbole_max][4];
+			/*int[][] transitions = new int[etat * nb_symbole_max][4];
 				for(int j = 0; it.hasNext(); j++)
 				{
 					transitions[j] = transition;
-				}
+				}*/
 		}
 	}
 
