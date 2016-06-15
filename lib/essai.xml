@@ -1,0 +1,31 @@
+<?xml version = "1.0" encoding="UTF-8" standalone="yes" ?>
+
+<parametres_jeu>
+	<!-- paramètres globaux -->
+	<nb_symbole_max>4</nb_symbole_max>
+	
+	<!-- la section des automates -->
+	<automate>
+		<nom>joueur1</nom>
+		<nb_etat>4</nb_etat>
+		<transitions>
+			<!-- Etat_in,symbole,action,Etat_out -->
+			<transition>0,0,0,1</transition>
+			<transition>0,1,2,1</transition>
+			<transition>0,2,4,1</transition>
+			<transition>0,3,6,1</transition>
+			<transition>1,0,0,2</transition>
+			<transition>1,1,0,2</transition>
+			<transition>1,2,0,2</transition>
+			<transition>1,3,0,2</transition>
+			<transition>2,0,0,3</transition>
+			<transition>2,1,1,3</transition>
+			<transition>2,2,3,3</transition>
+			<transition>2,3,5,3</transition>
+			<transition>3,0,0,0</transition>
+			<transition>3,1,0,0</transition>
+			<transition>3,2,0,0</transition>
+			<transition>3,3,0,0</transition>
+		</transitions>
+	</automate>
+</parametres_jeu>
