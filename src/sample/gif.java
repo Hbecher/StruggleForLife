@@ -2,18 +2,13 @@ package sample;/**
  * Created by Vincent on 09/06/2016.
  */
 
-import java.io.File;
 import javafx.application.Application;
-import javafx.geometry.Pos;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.scene.*;
-import javafx.util.Duration;
 
 
 public class gif extends Application {
@@ -35,7 +30,7 @@ public class gif extends Application {
         Image lake = new Image("sample/lake-effect.gif");
         Image meadow = new Image("sample/meadow-effect.gif");
         Image forest = new Image("sample/forest-effect.gif");
-        Image trapped = new Image("sample/trapped-effect2.gif");
+        Image trapped = new Image("sample/trapped-effect.gif");
         Image invalid = new Image("sample/invalid-effect.gif");
         Image pop5 = new Image("sample/pop5.gif");
         Image pop25 = new Image("sample/pop25.gif");
@@ -114,6 +109,10 @@ public class gif extends Application {
         // afficher l'animation de fond de consommation de case piégée par dessus ce qui précède
         ImageView imageViewforage_trapped_back = new ImageView(forage_trapped_back);
         gridpane.add(imageViewforage_trapped_back, 3, 6);
+
+        // afficher l'animation de piégeage de case par dessus ce qui précède
+        ImageView imageViewtrap = new ImageView(forage_trapped_back);
+        gridpane.add(imageViewtrap, 3, 3);
 
         // afficher 1 tombe par dessus par dessus ce qui précède
         ImageView imageViewdead1 = new ImageView(dead);
@@ -222,7 +221,7 @@ public class gif extends Application {
         gridpane.add(imageViewconflict, 3, 5);
 
         /*
-        // afficher 1 split de populations par dessus ce qui prècède (nécéssite 2 node adjacent !!!)
+        // incompatible tore : afficher 1 split de populations par dessus ce qui prècède (!!! nécéssite 2 node adjacent !!!)
         ImageView imageViewpopsplit1 = new ImageView(popsplit);
         gridpane.setColumnSpan(imageViewpopsplit1, 2);
         gridpane.add(imageViewpopsplit1, 31, 1);
