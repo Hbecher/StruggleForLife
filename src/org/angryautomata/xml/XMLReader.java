@@ -67,7 +67,12 @@ public class XMLReader
 				System.out.println("Value:" + node.getText());
 			}
 
-
+                /**
+                **transitions de type (Ei,symbole,action,Eo) dans xml
+                * <transition>2,1,1,3</transition>
+                * action[transition[j][1]][transition[j][0]]=transition[j][2]
+                * 
+                */
 			
 
                         Element maxsym=node.element("nb_symbole_max");
