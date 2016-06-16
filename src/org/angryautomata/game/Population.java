@@ -1,7 +1,6 @@
 package org.angryautomata.game;
 
 import javafx.scene.paint.Color;
-import org.angryautomata.Player;
 import org.angryautomata.game.scenery.Scenery;
 
 public class Population

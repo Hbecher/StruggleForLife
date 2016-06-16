@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.geometry.Point3D?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Button?>
@@ -15,7 +14,6 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.Slider?>
-<?import javafx.scene.effect.InnerShadow?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -50,18 +48,12 @@
                             <cursor>
                                 <Cursor fx:constant="CROSSHAIR" />
                             </cursor>
-                            <effect>
-                                <InnerShadow />
-                            </effect>
                         </Canvas>
                         <Canvas fx:id="overlay" nodeOrientation="INHERIT" onMouseClicked="#onOverlayMouseClicked">
                             <cursor>
                                 <Cursor fx:constant="CROSSHAIR" />
                             </cursor>
                         </Canvas>
-                  <rotationAxis>
-                     <Point3D />
-                  </rotationAxis>
                     </StackPane>
                     <contextMenu>
                         <ContextMenu>
@@ -69,7 +61,7 @@
                                 <MenuItem fx:id="putMarker" mnemonicParsing="false" onAction="#putMarker" text="Poser une balise" />
                                 <MenuItem fx:id="eraseMarker" mnemonicParsing="false" onAction="#delMarker" text="Retirer la balise" />
                                 <SeparatorMenuItem mnemonicParsing="false" />
-                                <MenuItem mnemonicParsing="false" onAction="#regenAutomaton" text="Réparér automate" />
+                                <MenuItem mnemonicParsing="false" onAction="#regenAutomaton" text="Réparer automate" />
                             </items>
                         </ContextMenu>
                     </contextMenu>
@@ -83,7 +75,7 @@
                         </columnConstraints>
                         <rowConstraints>
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -105,6 +97,7 @@
                         <Label fx:id="ticksLabel" text="N/A" GridPane.columnIndex="1" />
                         <Label text="Couleur :" GridPane.rowIndex="3" />
                         <Canvas fx:id="colorCanvas" height="16.0" width="16.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Button mnemonicParsing="false" text="Aller sur l'automate" GridPane.columnSpan="2" GridPane.rowIndex="8" />
                     </GridPane>
                 </Pane>
             </HBox>

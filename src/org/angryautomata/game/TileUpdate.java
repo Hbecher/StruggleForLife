@@ -1,12 +1,12 @@
 package org.angryautomata.game;
 
-public class Update
+public class TileUpdate
 {
 	private final int prevSymbol;
 	private final int regenTicks;
 	private int ticksLeft;
 
-	public Update(int prevSymbol, int regenTicks)
+	public TileUpdate(int prevSymbol, int regenTicks)
 	{
 		this.prevSymbol = prevSymbol;
 		this.regenTicks = ticksLeft = regenTicks;

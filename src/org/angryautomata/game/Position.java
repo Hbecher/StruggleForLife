@@ -45,10 +45,4 @@ public class Position
 	{
 		return 31 * getX() + getY();
 	}
-
-	@Override
-	public String toString()
-	{
-		return "(" + x + ", " + y + ")";
-	}
 }

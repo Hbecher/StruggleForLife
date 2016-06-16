@@ -1,5 +1,7 @@
 package org.angryautomata.game.scenery;
 
+import javafx.scene.paint.Color;
+
 public class Scenery
 {
 	private static final int SCENERIES = 4;
@@ -7,15 +9,17 @@ public class Scenery
 	private final int symbol, fakeSymbol;
 	private final int gradient;
 	private final int[] validActions;
+	private final Color color;
 	private boolean trapped;
 
-	protected Scenery(int symbol, int[] validActions, int gradient, boolean trapped)
+	protected Scenery(int symbol, int[] validActions, int gradient, boolean trapped, Color color)
 	{
 		this.symbol = trapped ? symbol + SCENERIES - 1 : symbol;
 		fakeSymbol = symbol;
 		this.gradient = trapped ? -gradient : gradient;
 		this.validActions = validActions;
 		this.trapped = trapped;
+		this.color = color;
 	}
 
 	public static int sceneries()
@@ -97,5 +101,10 @@ public class Scenery
 	public int[] getValidActions()
 	{
 		return validActions;
+	}
+
+	public Color getColor()
+	{
+		return color;
 	}
 }

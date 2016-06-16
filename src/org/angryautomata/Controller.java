@@ -17,10 +17,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import org.angryautomata.game.Automaton;
-import org.angryautomata.game.Game;
-import org.angryautomata.game.Population;
-import org.angryautomata.game.Position;
+import org.angryautomata.game.*;
 import org.angryautomata.game.scenery.Scenery;
 
 public class Controller extends BorderPane
@@ -127,7 +124,7 @@ public class Controller extends BorderPane
 		{
 			for(int j = 0; j < width; j++)
 			{
-				gc.setFill(ofScenery(game.getSceneryAt(game.torusPos(j, i))));
+				gc.setFill(game.getSceneryAt(game.torusPos(j, i)).getColor());
 				gc.fillRect(posToCanvas(j), posToCanvas(i), SQUARE_SIZE, SQUARE_SIZE);
 			}
 		}
@@ -135,15 +132,18 @@ public class Controller extends BorderPane
 		updateOverlay();
 	}
 
-	public void updateScreen(final List<Population> populations, final Deque<Position> tiles, final Map<Player, Position> markers)
+	public void updateScreen(final Deque<Position> tileUpdates)
 	{
+		final List<Population> populations = game.getPopulations();
+		final Map<Player, Position> markers = game.getMarkers();
+
 		final GraphicsContext gc = screen.getGraphicsContext2D();
 
-		while(!tiles.isEmpty())
+		while(!tileUpdates.isEmpty())
 		{
-			Position position = tiles.poll();
+			Position position = tileUpdates.poll();
 
-			gc.setFill(ofScenery(game.getSceneryAt(position)));
+			gc.setFill(game.getSceneryAt(position).getColor());
 			gc.fillRect(posToCanvas(position.getX()), posToCanvas(position.getY()), SQUARE_SIZE, SQUARE_SIZE);
 		}
 
@@ -151,10 +151,10 @@ public class Controller extends BorderPane
 		{
 			Position position = population.getPosition(), previous = population.getPreviousPosition();
 
-			gc.setFill(ofScenery(game.getSceneryAt(previous)));
+			gc.setFill(game.getSceneryAt(previous).getColor());
 			gc.fillRect(posToCanvas(previous.getX()), posToCanvas(previous.getY()), SQUARE_SIZE, SQUARE_SIZE);
 
-			gc.setFill(ofScenery(game.getSceneryAt(position)));
+			gc.setFill(game.getSceneryAt(position).getColor());
 			gc.fillRect(posToCanvas(position.getX()), posToCanvas(position.getY()), SQUARE_SIZE, SQUARE_SIZE);
 		}
 
@@ -188,37 +188,6 @@ public class Controller extends BorderPane
 	private int canvasToPos(double pos)
 	{
 		return (int) ((pos - 1.0D) / (SQUARE_SIZE + 1.0D));
-	}
-
-	private Color ofScenery(Scenery scenery)
-	{
-		switch(scenery.getFakeSymbol())
-		{
-			case 0:
-			{
-				return Color.GOLD;
-			}
-
-			case 1:
-			{
-				return Color.AQUAMARINE;
-			}
-
-			case 2:
-			{
-				return Color.LAWNGREEN;
-			}
-
-			case 3:
-			{
-				return Color.FORESTGREEN;
-			}
-
-			default:
-			{
-				return Color.GRAY;
-			}
-		}
 	}
 
 	private void updateOverlay()
