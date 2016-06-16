@@ -37,9 +37,10 @@ public class Images
 	public static final Image regenmeadow = new Image("sample/regen_desert_meadow.gif");
 	public static final Image regenforest = new Image("sample/regen_meadow_forest.gif");
 	public static final Image forage_back = new Image("sample/forage_back.gif");
-	public static final Image forage_trapped_back = new Image("sample/forage_trapped_back.gif");
+	public static final Image forage_trapped_back = new Image("sample/forage_trapped_back.gif"); // sert aussi pour trap back
 	public static final Image forage = new Image("sample/forage.gif");
 	public static final Image forage_trapped = new Image("sample/forage_trapped.gif");
 	public static final Image conflict = new Image("sample/conflict.gif");
+	public static final Image vide = new Image("sample/vide.gif");
 }
 */

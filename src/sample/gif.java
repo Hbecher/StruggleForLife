@@ -78,7 +78,7 @@ public class gif extends Application {
         int k = 0;
         ImageView[][][] tab3d = new ImageView[32][5*4][8];
         for (int l = 0; l < 8; l++) {
-            for (int j=0;j<32;j++){
+            for (int j = 0; j < 32; j++){
                 for (int i = 0; i < 5*4; i++) {
 
                     //image vide par défaut pour les gridpanes
