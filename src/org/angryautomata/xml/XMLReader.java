@@ -18,7 +18,10 @@ public class XMLReader
 {
 	static class TestDom4j
 	{
-		public static final String FILENAME_STRING = "./lib/essai.xml";
+		public static final String FILENAME_STRING = "./lib/essai.xml";//supprimer "final" ici !!!!!!!????
+		//int nb_symbole_max,etat;
+		//int[][] transition = new int[etat * nb_symbole_max][4];
+		//on met tout "static" ici ??????????????           pour merge dans GAME ~~~~~~~~~~~~~~~~~~~~
 
 		public static void main(String[] args)
 		{
@@ -67,11 +70,23 @@ public class XMLReader
 				System.out.println("Value:" + node.getText());
 			}
 
-                /**
+                /**                                pour merge dans GAME ~~~~~~~~~~~~~~~~~~~~
+                * !!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 **transitions de type (Ei,symbole,action,Eo) dans xml
-                * <transition>2,1,1,3</transition>
-                * action[transition[j][1]][transition[j][0]]=transition[j][2]
+                * ex:<transition>2,1,1,3</transition>
                 * 
+                * Java class Automation
+                * transitions[symbol][state];
+                * return actions[symbol][state];
+                * 
+                * dans for(transio.size()){}:
+                * action[transition[j][1]][transition[j][0]]=transition[j][2]
+                * transitions[transition[j][1]][transition[j][0]]=transition[j][3]
+                * 
+                * ici:action[1][2]=1
+                *     transitions[1][2]=3
+                * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                *                                                                 pour merge dans GAME ~~~~~~~~~~~~~
                 */
 			
 
@@ -82,7 +97,7 @@ public class XMLReader
 				nb_symbole_max = Integer.parseInt(maxsym.getStringValue());
 			}
 			Element auto =node.element("automate");
-			String joueur = auto.element("nom").getStringValue();
+			//String joueur = auto.element("nom").getStringValue();
 			int etat = Integer.valueOf(auto.element("nb_etat").getStringValue());
 			int[][] transition = new int[etat * nb_symbole_max][4];
 		
