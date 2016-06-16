@@ -22,8 +22,6 @@ public class gif extends Application {
 
         Group root = new Group();
         Scene scene = new Scene(root, 1024, 768, Color.BLACK);
-        GridPane gridpane = new GridPane();
-//        gridpane.setAlignment(Pos.CENTER);
 
         // pour charger les images
         Image desert = new Image("sample/desert-effect.gif");
@@ -64,24 +62,67 @@ public class gif extends Application {
         Image forage_trapped = new Image("sample/forage_trapped.gif");
         Image trap = new Image("sample/trap.gif");
         Image conflict = new Image("sample/conflict.gif");
+        Image vide = new Image("sample/vide.gif");
+
+        GridPane gridpanedecor = new GridPane();
+        GridPane gridpaneregenfond = new GridPane();
+        GridPane gridpanedead = new GridPane();
+        GridPane gridpaneextnewpop = new GridPane();
+        GridPane gridpanepiege = new GridPane();
+        GridPane gridpanemigration = new GridPane();
+        GridPane gridpanepop = new GridPane();
+        GridPane gridpanefront = new GridPane();
 
 
-        // pour remplir la gridpane des images ( symboles )
+        // pour remplir initialement les gridpanes (couches graphiques)
         int k = 0;
-//        int l = 0;
-        for (int j=0;j<32;j++){
-            for (int i = 0; i < 5*4; i++) {
-                ImageView imageView;
-                if (k == 0) {imageView = new ImageView(forest); k = 1;}
-                else if (k == 1) {imageView = new ImageView(meadow); k = 2;}
-                else if (k == 2) {imageView = new ImageView(lake); k = 3;}
-                else {imageView = new ImageView(desert); k = 0;}
-                gridpane.add(imageView, j, i);// j et i sont les coordonnées (x,y) de la gridpane où mettre l'image
+        ImageView[][][] tab3d = new ImageView[32][5*4][8];
+        for (int l = 0; l < 8; l++) {
+            for (int j=0;j<32;j++){
+                for (int i = 0; i < 5*4; i++) {
 
-//                if (l == 0 && k != 0) {gridpane.add(imageView, j, i); gridpane.add(imageViewalter, j, i); l = 1;}
-//                else if (l == 1 && k != 0) {gridpane.add(imageView, j, i); gridpane.add(imageViewinvalid, j, i); l = 2;}
-//                else if (l == 2 && k != 0) {gridpane.add(imageView, j, i); gridpane.add(imageViewalter, j, i); gridpane.add(imageViewinvalid, j, i); l = 3;}
-//                else {gridpane.add(imageView, j, i); l = 0;}
+                    //image vide par défaut pour les gridpanes
+                    ImageView objetimage = new ImageView(vide);
+
+                    if(l == 0) {
+                        //gridpane decor
+                        if (k == 0) {objetimage.setImage(forest); k = 1;}
+                        else if (k == 1) {objetimage.setImage(meadow); k = 2;}
+                        else if (k == 2) {objetimage.setImage(lake); k = 3;}
+                        else {objetimage.setImage(desert); k = 0;}
+                        gridpanedecor.add(objetimage, j, i);// j et i sont les coordonnées (x,y) de la gridpane où mettre l'image
+                    }
+                    else if(l == 1) {
+                        //gridpane regen map / (back) conso case / conso case piégée / piégeage case
+                        gridpaneregenfond.add(objetimage, j, i);
+                    }
+                    else if(l == 2) {
+                        //gridpane tombes
+                        gridpanedead.add(objetimage, j, i);
+                    }
+                    else if(l == 3) {
+                        //gridpane [animation] extinction pop / split pop (4 directions)
+                        gridpaneextnewpop.add(objetimage, j, i);
+                    }
+                    else if(l == 4) {
+                        // gridpane piege en place (bulles)
+                        gridpanepiege.add(objetimage, j, i);
+                    }
+                    else if(l == 5) {
+                        // gridpane migration pop (4 directions)
+                        gridpanemigration.add(objetimage, j, i);
+                    }
+                    else if(l == 6) {
+                        // gridpane pop (5, 25, 50, 75, 95)
+                        gridpanepop.add(objetimage, j, i);
+                    }
+                    else { //if(l == 7)
+                        // gridpane  conflict / action invalide /(front) conso case / conso case piégée / piégeage case
+                        gridpanefront.add(objetimage, j, i);
+                    }
+                    // tableau
+                    tab3d[j][i][l] = objetimage;
+                }
             }
         }
 
@@ -95,157 +136,91 @@ public class gif extends Application {
         mediaPlayer.play();
         */
 
+
         // afficher l'animation de régénération de case par dessus les images des cases
-        ImageView imageViewregenlake = new ImageView(regenlake);
-        gridpane.add(imageViewregenlake, 13, 7);
-        ImageView imageViewregenmeadow = new ImageView(regenmeadow);
-        gridpane.add(imageViewregenmeadow, 14, 7);
-        ImageView imageViewregenforest = new ImageView(regenforest);
-        gridpane.add(imageViewregenforest, 14, 6);
-
+        tab3d[13][7][1].setImage(regenlake);
+        tab3d[14][7][1].setImage(regenmeadow);
+        tab3d[14][6][1].setImage(regenforest);
         // afficher l'animation de fond de consommation de case par dessus les images des cases
-        ImageView imageViewforage_back = new ImageView(forage_back);
-        gridpane.add(imageViewforage_back, 3,4);
-
+        tab3d[3][4][1].setImage(forage_back);
         // afficher l'animation de fond de consommation de case piégée par dessus ce qui précède
-        ImageView imageViewforage_trapped_back = new ImageView(forage_trapped_back);
-        gridpane.add(imageViewforage_trapped_back, 3, 6);
-
+        tab3d[3][6][1].setImage(forage_trapped_back);
         // afficher l'animation de piégeage de case par dessus ce qui précède
-        ImageView imageViewtrap_back = new ImageView(forage_trapped_back);
-        gridpane.add(imageViewtrap_back, 3, 3);
+        tab3d[3][3][1].setImage(forage_trapped_back);
 
         // afficher 1 tombe par dessus par dessus ce qui précède
-        ImageView imageViewdead1 = new ImageView(dead);
-        gridpane.add(imageViewdead1, 6, 7);
-        ImageView imageViewdead2 = new ImageView(dead);
-        gridpane.add(imageViewdead2, 9, 6);
+        tab3d[6][7][2].setImage(dead);
+        tab3d[9][6][2].setImage(dead);
 
         // afficher l'animation d'extinction de population  par dessus ce qui précède
-        ImageView imageViewpopdead1 = new ImageView(pop_death);
-        gridpane.add(imageViewpopdead1, 10, 7);
-
+        tab3d[10][7][3].setImage(pop_death);
         // afficher l'animation de split de population  par dessus ce qui précède(!!! 2 images => 1 image par case !!!)
-        ImageView imageViewpopsplitda = new ImageView(popsplitda);// case départ
-        gridpane.add(imageViewpopsplitda, 10, 9);
-        ImageView imageViewpopsplitdb = new ImageView(popsplitdb);//case arrivée
-        gridpane.add(imageViewpopsplitdb, 11, 9);
-        ImageView imageViewpopsplitga = new ImageView(popsplitga);
-        gridpane.add(imageViewpopsplitga, 10, 10);
-        ImageView imageViewpopsplitgb = new ImageView(popsplitgb);
-        gridpane.add(imageViewpopsplitgb, 9, 10);
-        ImageView imageViewpopsplitha = new ImageView(popsplitha);
-        gridpane.add(imageViewpopsplitha, 10, 12);
-        ImageView imageViewpopsplithb = new ImageView(popsplithb);
-        gridpane.add(imageViewpopsplithb, 10, 11);
-        ImageView imageViewpopsplitba = new ImageView(popsplitba);
-        gridpane.add(imageViewpopsplitba, 10, 13);
-        ImageView imageViewpopsplitbb = new ImageView(popsplitbb);
-        gridpane.add(imageViewpopsplitbb, 10, 14);
+        tab3d[10][9][3].setImage(popsplitda);// case départ
+        tab3d[11][9][3].setImage(popsplitdb);//case arrivée
+        tab3d[10][10][3].setImage(popsplitga);
+        tab3d[9][9][3].setImage(popsplitgb);
+        tab3d[10][12][3].setImage(popsplitha);
+        tab3d[10][11][3].setImage(popsplithb);
+        tab3d[10][13][3].setImage(popsplitba);
+        tab3d[10][14][3].setImage(popsplitbb);
 
         // afficher 1 piège par dessus ce qui précède
-        ImageView imageViewalter1 = new ImageView(trapped);
-        gridpane.add(imageViewalter1, 8, 6);
-        ImageView imageViewalter2 = new ImageView(trapped);
-        gridpane.add(imageViewalter2, 8, 5);
-        ImageView imageViewalter3 = new ImageView(trapped);
-        gridpane.add(imageViewalter3, 8, 4);
-        ImageView imageViewalter4 = new ImageView(trapped);
-        gridpane.add(imageViewalter4, 9, 6);
-        ImageView imageViewalter5 = new ImageView(trapped);
-        gridpane.add(imageViewalter5, 10, 6);
-        ImageView imageViewalter6 = new ImageView(trapped);
-        gridpane.add(imageViewalter6, 10, 5);
-        ImageView imageViewalter7 = new ImageView(trapped);
-        gridpane.add(imageViewalter7, 10, 4);
-        ImageView imageViewalter8 = new ImageView(trapped);
-        gridpane.add(imageViewalter8, 10, 2);
+        tab3d[8][6][4].setImage(trapped);
+        tab3d[8][5][4].setImage(trapped);
+        tab3d[8][4][4].setImage(trapped);
+        tab3d[9][6][4].setImage(trapped);
+        tab3d[10][6][4].setImage(trapped);
+        tab3d[10][5][4].setImage(trapped);
+        tab3d[10][4][4].setImage(trapped);
+        tab3d[10][2][4].setImage(trapped);
 
         // afficher l'animation de migration de population  par dessus ce qui prècède (!!! 2 images => 1 image par case !!!)
-        ImageView imageViewpopmigrateda = new ImageView(popmigrateda);// case départ
-        gridpane.add(imageViewpopmigrateda, 6, 6);
-        ImageView imageViewpopmigratedb = new ImageView(popmigratedb);//case arrivée
-        gridpane.add(imageViewpopmigratedb, 7, 6);
-        ImageView imageViewpopmigratega = new ImageView(popmigratega);
-        gridpane.add(imageViewpopmigratega, 6, 5);
-        ImageView imageViewpopmigrategb = new ImageView(popmigrategb);
-        gridpane.add(imageViewpopmigrategb, 5, 5);
-       ImageView imageViewpopmigrateha = new ImageView(popmigrateha);
-        gridpane.add(imageViewpopmigrateha, 6, 2);
-        ImageView imageViewpopmigratehb = new ImageView(popmigratehb);
-        gridpane.add(imageViewpopmigratehb, 6, 1);
-       ImageView imageViewpopmigrateba = new ImageView(popmigrateba);
-        gridpane.add(imageViewpopmigrateba, 6, 7);
-        ImageView imageViewpopmigratebb = new ImageView(popmigratebb);
-        gridpane.add(imageViewpopmigratebb, 6, 8);
+        tab3d[6][6][5].setImage(popmigrateda);
+        tab3d[7][6][5].setImage(popmigratedb);
+        tab3d[6][5][5].setImage(popmigratega);
+        tab3d[5][5][5].setImage(popmigrategb);
+        tab3d[6][2][5].setImage(popmigrateha);
+        tab3d[6][1][5].setImage(popmigratehb);
+        tab3d[6][7][5].setImage(popmigrateba);
+        tab3d[6][8][5].setImage(popmigratebb);
 
         // afficher 1 population ( selon gradient ) par dessus ce qui prècède
-        ImageView imageViewpop = new ImageView(pop5);
-        gridpane.add(imageViewpop, 6, 6);
-        ImageView imageViewpop2 = new ImageView(pop25);
-        gridpane.add(imageViewpop2, 6, 5);
-        ImageView imageViewpop3 = new ImageView(pop50);
-        gridpane.add(imageViewpop3, 6, 4);
-        ImageView imageViewpop4 = new ImageView(pop75);
-        gridpane.add(imageViewpop4, 6, 3);
-        ImageView imageViewpop5 = new ImageView(pop95);
-        gridpane.add(imageViewpop5, 6, 2);
-        ImageView imageViewpop6 = new ImageView(pop5);
-        gridpane.add(imageViewpop6, 10, 6);
-        ImageView imageViewpop7 = new ImageView(pop25);
-        gridpane.add(imageViewpop7, 10, 5);
-        ImageView imageViewpop8 = new ImageView(pop50);
-        gridpane.add(imageViewpop8, 10, 4);
-        ImageView imageViewpop9 = new ImageView(pop75);
-        gridpane.add(imageViewpop9, 10, 3);
-        ImageView imageViewpop10 = new ImageView(pop95);
-        gridpane.add(imageViewpop10, 10, 2);
-        ImageView imageViewpop11 = new ImageView(pop50);
-        gridpane.add(imageViewpop11, 3, 4);
-        ImageView imageViewpop12 = new ImageView(pop50);
-        gridpane.add(imageViewpop12, 3, 6);
-        ImageView imageViewpop13 = new ImageView(pop50);
-        gridpane.add(imageViewpop13, 3, 5);
-        ImageView imageViewpop14 = new ImageView(pop50);
-        gridpane.add(imageViewpop14, 3, 5);
+        tab3d[6][6][6].setImage(pop5);
+        tab3d[6][5][6].setImage(pop25);
+        tab3d[6][4][6].setImage(pop50);
+        tab3d[6][3][6].setImage(pop75);
+        tab3d[6][2][6].setImage(pop95);
+        tab3d[10][6][6].setImage(pop5);
+        tab3d[10][5][6].setImage(pop25);
+        tab3d[10][4][6].setImage(pop50);
+        tab3d[10][3][6].setImage(pop75);
+        tab3d[10][2][6].setImage(pop95);
+        tab3d[3][4][6].setImage(pop50);
+        tab3d[3][6][6].setImage(pop50);
+        tab3d[3][5][6].setImage(pop50);
+        tab3d[3][5][6].setImage(pop50);
 
         // afficher l'animation de consommation de case par dessus ce qui précède
-        ImageView imageViewforage_front = new ImageView(forage);
-        gridpane.add(imageViewforage_front, 3,4);
-
+        tab3d[3][4][7].setImage(forage);
         // afficher l'animation de consommation de case piégée par dessus ce qui précède
-        ImageView imageViewforage_trapped_front = new ImageView(forage_trapped);
-        gridpane.add(imageViewforage_trapped_front, 3, 6);
-
+        tab3d[3][6][7].setImage(forage_trapped);
         // afficher l'animation de piégeage de case par dessus ce qui précède
-        ImageView imageViewtrap_front = new ImageView(trap);
-        gridpane.add(imageViewtrap_front, 3, 3);
-
+        tab3d[3][3][7].setImage(trap);
         // afficher l'animation de combat entre 2 populations par dessus ce qui précède
-        ImageView imageViewconflict = new ImageView(conflict);
-        gridpane.add(imageViewconflict, 3, 5);
-
-        /*
-        // incompatible tore : afficher 1 split de populations par dessus ce qui prècède (!!! nécéssite 2 node adjacent !!!)
-        ImageView imageViewpopsplit1 = new ImageView(popsplit);
-        gridpane.setColumnSpan(imageViewpopsplit1, 2);
-        gridpane.add(imageViewpopsplit1, 31, 1);
-        */
-
+        tab3d[3][5][7].setImage(conflict);
         // afficher une action invalide par dessus ce qui prècède
-        ImageView imageViewinvalid1 = new ImageView(invalid);
-        gridpane.add(imageViewinvalid1, 10, 2);
-        ImageView imageViewinvalid2 = new ImageView(invalid);
-        gridpane.add(imageViewinvalid2, 10, 3);
-        ImageView imageViewinvalid3 = new ImageView(invalid);
-        gridpane.add(imageViewinvalid3, 10, 4);
-        ImageView imageViewinvalid4 = new ImageView(invalid);
-        gridpane.add(imageViewinvalid4, 10, 5);
-        ImageView imageViewinvalid5 = new ImageView(invalid);
-        gridpane.add(imageViewinvalid5, 10, 6);
+        tab3d[10][2][7].setImage(invalid);
+        tab3d[10][3][7].setImage(invalid);
+        tab3d[10][4][7].setImage(invalid);
+        tab3d[10][5][7].setImage(invalid);
+        tab3d[10][6][7].setImage(invalid);
 
         // Display image on screen
-        root.getChildren().add(gridpane);
+        root.getChildren().addAll(gridpanedecor,gridpaneregenfond,gridpanedead,gridpaneextnewpop, gridpanepiege, gridpanemigration, gridpanepop, gridpanefront);
+
+        //test remettre une image vide
+        tab3d[31][19][0].setImage(vide);
+
         primaryStage.setTitle("test animated");
         primaryStage.setScene(scene);
         primaryStage.setFullScreen(false);
