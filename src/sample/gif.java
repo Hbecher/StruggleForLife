@@ -62,6 +62,7 @@ public class gif extends Application {
         Image forage_trapped_back = new Image("sample/forage_trapped_back.gif");
         Image forage = new Image("sample/forage.gif");
         Image forage_trapped = new Image("sample/forage_trapped.gif");
+        Image trap = new Image("sample/trap.gif");
         Image conflict = new Image("sample/conflict.gif");
 
 
@@ -111,8 +112,8 @@ public class gif extends Application {
         gridpane.add(imageViewforage_trapped_back, 3, 6);
 
         // afficher l'animation de piégeage de case par dessus ce qui précède
-        ImageView imageViewtrap = new ImageView(forage_trapped_back);
-        gridpane.add(imageViewtrap, 3, 3);
+        ImageView imageViewtrap_back = new ImageView(forage_trapped_back);
+        gridpane.add(imageViewtrap_back, 3, 3);
 
         // afficher 1 tombe par dessus par dessus ce qui précède
         ImageView imageViewdead1 = new ImageView(dead);
@@ -209,12 +210,16 @@ public class gif extends Application {
         gridpane.add(imageViewpop14, 3, 5);
 
         // afficher l'animation de consommation de case par dessus ce qui précède
-        ImageView imageViewforage = new ImageView(forage);
-        gridpane.add(imageViewforage, 3,4);
+        ImageView imageViewforage_front = new ImageView(forage);
+        gridpane.add(imageViewforage_front, 3,4);
 
         // afficher l'animation de consommation de case piégée par dessus ce qui précède
-        ImageView imageViewforage_trapped = new ImageView(forage_trapped);
-        gridpane.add(imageViewforage_trapped, 3, 6);
+        ImageView imageViewforage_trapped_front = new ImageView(forage_trapped);
+        gridpane.add(imageViewforage_trapped_front, 3, 6);
+
+        // afficher l'animation de piégeage de case par dessus ce qui précède
+        ImageView imageViewtrap_front = new ImageView(trap);
+        gridpane.add(imageViewtrap_front, 3, 3);
 
         // afficher l'animation de combat entre 2 populations par dessus ce qui précède
         ImageView imageViewconflict = new ImageView(conflict);
