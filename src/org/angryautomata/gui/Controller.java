@@ -1,4 +1,4 @@
-package org.angryautomata;
+package org.angryautomata.gui;
 
 import java.io.IOException;
 import java.util.Deque;
@@ -25,7 +25,7 @@ public class Controller extends BorderPane
 	private static final int SQUARE_SIZE = 32;
 
 	@FXML
-	public MenuItem putMarker, eraseMarker;
+	public MenuItem placeMarker, eraseMarker, regenAutomaton;
 	@FXML
 	public Slider tickSpeed;
 	@FXML
@@ -41,7 +41,7 @@ public class Controller extends BorderPane
 
 	public Controller()
 	{
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("jfx.fxml"));
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("gui.fxml"));
 		loader.setRoot(this);
 		loader.setController(this);
 
@@ -130,6 +130,7 @@ public class Controller extends BorderPane
 		}
 
 		updateOverlay();
+		updateControls();
 	}
 
 	public void updateScreen(final Deque<Position> tileUpdates)
@@ -178,6 +179,7 @@ public class Controller extends BorderPane
 		}
 
 		updateData();
+		updateControls();
 	}
 
 	private double posToCanvas(int pos)
@@ -262,6 +264,24 @@ public class Controller extends BorderPane
 		}
 	}
 
+	private void updateControls()
+	{
+		Player player = game.getPlayer(playersBox.getValue());
+
+		if(player != null && !player.isDead())
+		{
+			placeMarker.setDisable(!player.canPlaceMarker());
+			eraseMarker.setDisable(!game.hasMarker(player));
+			regenAutomaton.setDisable(!player.canRegenAutomaton());
+		}
+		else
+		{
+			placeMarker.setDisable(true);
+			eraseMarker.setDisable(true);
+			regenAutomaton.setDisable(true);
+		}
+	}
+
 	@FXML
 	public void pauseOrResumeGame()
 	{
@@ -300,6 +320,8 @@ public class Controller extends BorderPane
 		if(selection != null)
 		{
 			game.addMarker(playersBox.getValue(), selection);
+
+			updateControls();
 		}
 	}
 
@@ -307,6 +329,8 @@ public class Controller extends BorderPane
 	public void delMarker(ActionEvent e)
 	{
 		game.delMarker(playersBox.getValue());
+
+		updateControls();
 	}
 
 	@FXML
@@ -317,6 +341,8 @@ public class Controller extends BorderPane
 		if(player != null)
 		{
 			game.regenAutomaton(player);
+
+			updateControls();
 		}
 	}
 

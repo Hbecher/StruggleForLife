@@ -58,10 +58,10 @@
                     <contextMenu>
                         <ContextMenu>
                             <items>
-                                <MenuItem fx:id="putMarker" mnemonicParsing="false" onAction="#putMarker" text="Poser une balise" />
+                                <MenuItem fx:id="placeMarker" mnemonicParsing="false" onAction="#putMarker" text="Poser une balise" />
                                 <MenuItem fx:id="eraseMarker" mnemonicParsing="false" onAction="#delMarker" text="Retirer la balise" />
                                 <SeparatorMenuItem mnemonicParsing="false" />
-                                <MenuItem mnemonicParsing="false" onAction="#regenAutomaton" text="Réparer automate" />
+                                <MenuItem fx:id="regenAutomaton" mnemonicParsing="false" onAction="#regenAutomaton" text="Réparer automate" />
                             </items>
                         </ContextMenu>
                     </contextMenu>

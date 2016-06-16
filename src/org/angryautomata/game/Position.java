@@ -2,6 +2,8 @@ package org.angryautomata.game;
 
 public class Position
 {
+	public static final Position ORIGIN = new Position(0, 0);
+
 	private final int x;
 	private final int y;
 

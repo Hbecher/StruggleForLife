@@ -8,10 +8,13 @@ import javafx.scene.paint.Color;
 
 public class Player
 {
+	private static final int MARKER_COOLDOWN = 100, REGEN_COOLDOWN = 100;
+
 	private final Automaton automaton;
 	private final String name;
 	private final Color color;
 	private final List<Population> populations = new ArrayList<>();
+	private int markerCooldown = MARKER_COOLDOWN, regenCooldown = REGEN_COOLDOWN;
 
 	public Player(Automaton automaton, String name, int rgb)
 	{
@@ -68,5 +71,50 @@ public class Player
 	public int getMeanGradient()
 	{
 		return getTotalGradient() / populations.size();
+	}
+
+	public boolean isDead()
+	{
+		for(Population population : populations)
+		{
+			if(population.isDead())
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public void decMarkerCooldown()
+	{
+		if(markerCooldown > 0)
+		{
+			markerCooldown--;
+		}
+	}
+
+	public void decRegenCooldown()
+	{
+		if(regenCooldown > 0)
+		{
+			regenCooldown--;
+		}
+	}
+
+	public void resetCooldowns()
+	{
+		markerCooldown = MARKER_COOLDOWN;
+		regenCooldown = REGEN_COOLDOWN;
+	}
+
+	public boolean canPlaceMarker()
+	{
+		return markerCooldown <= 0;
+	}
+
+	public boolean canRegenAutomaton()
+	{
+		return regenCooldown <= 0;
 	}
 }

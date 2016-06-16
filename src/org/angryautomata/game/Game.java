@@ -1,15 +1,14 @@
 package org.angryautomata.game;
 
-
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 import javafx.application.Platform;
-import org.angryautomata.Controller;
 import org.angryautomata.game.action.Action;
 import org.angryautomata.game.action.Nothing;
 import org.angryautomata.game.scenery.Scenery;
+import org.angryautomata.gui.Controller;
 
 public class Game implements Runnable
 {
@@ -36,7 +35,7 @@ public class Game implements Runnable
 
 		if(players == null || players.length < 1)
 		{
-			throw new RuntimeException("There must be at least one player");
+			throw new RuntimeException("There must be at least one player!");
 		}
 
 		for(int i = 0; i < players.length; i++)
@@ -49,8 +48,9 @@ public class Game implements Runnable
 			int actions = Scenery.sceneries(), states = automaton.numberOfStates();
 			Position origin = automaton.getOrigin();
 			int ox = origin.getX(), oy = origin.getY();
+			Position position = (int) (Math.random() * 2.0D) == 0 ? new Position(ox + (int) (Math.random() * states), oy + (int) (Math.random() * 2.0D) * actions) : new Position(ox + (int) (Math.random() * 2.0D) * states, oy + (int) (Math.random() * actions));
 
-			addPopulation(new Population(player, 0, i, board.torusPos(ox + (int) (Math.random() * states), oy + (int) (Math.random() * actions))));
+			addPopulation(new Population(player, 0, i, position));
 		}
 	}
 
@@ -198,6 +198,7 @@ public class Game implements Runnable
 						board.setSceneryAt(rnd, Scenery.byId(tileUpdate.getPrevSymbol()));
 
 						tileUpdates.remove(0);
+
 						this.tileUpdates.add(rnd);
 					}
 					else
@@ -208,6 +209,16 @@ public class Game implements Runnable
 			}
 
 			ticks++;
+
+			for(Player player : players)
+			{
+				if(!hasMarker(player))
+				{
+					player.decMarkerCooldown();
+				}
+
+				player.decRegenCooldown();
+			}
 
 			Platform.runLater(() -> controller.updateScreen(tileUpdates));
 
@@ -463,6 +474,8 @@ public class Game implements Runnable
 				}
 			}
 		}
+
+		player.resetCooldowns();
 	}
 
 	public void addMarker(String name, Position position)
@@ -479,6 +492,8 @@ public class Game implements Runnable
 			}
 
 			markers.put(player, position);
+
+			player.resetCooldowns();
 		}
 	}
 
@@ -495,6 +510,11 @@ public class Game implements Runnable
 				tileUpdates.add(position);
 			}
 		}
+	}
+
+	public boolean hasMarker(Player player)
+	{
+		return markers.containsKey(player);
 	}
 
 	public Map<Player, Position> getMarkers()
