@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import org.angryautomata.Controller;
-import org.angryautomata.Player;
 import org.angryautomata.game.action.Action;
 import org.angryautomata.game.action.Nothing;
 import org.angryautomata.game.scenery.Scenery;
@@ -20,7 +19,7 @@ public class Game implements Runnable
 	private final Board board;
 	private final Player[] players;
 	private final List<Population> populations = new ArrayList<>();
-	private final Map<Position, ArrayList<Update>> toUpdate = new HashMap<>();
+	private final Map<Position, ArrayList<TileUpdate>> pendingUpdates = new HashMap<>();
 	private final Map<Player, Position> markers = new HashMap<>();
 	private final Deque<Position> tileUpdates = new ArrayDeque<>();
 	private final Controller controller;
@@ -142,14 +141,14 @@ public class Game implements Runnable
 
 					if(action.updatesMap())
 					{
-						if(!toUpdate.containsKey(self))
+						if(!pendingUpdates.containsKey(self))
 						{
-							toUpdate.put(self, new ArrayList<>());
+							pendingUpdates.put(self, new ArrayList<>());
 						}
 
-						ArrayList<Update> pending = toUpdate.get(self);
-						Update update = new Update(o.getFakeSymbol(), 80);
-						pending.add(0, update);
+						ArrayList<TileUpdate> pending = pendingUpdates.get(self);
+						TileUpdate tileUpdate = new TileUpdate(o.getFakeSymbol(), 80);
+						pending.add(0, tileUpdate);
 					}
 				}
 
@@ -168,6 +167,7 @@ public class Game implements Runnable
 				population.played(true);
 			});
 
+			populations.stream().filter(this::hasOwnMarkerOnSelf).forEach(population -> delMarker(population.getPlayer().getName()));
 			dead.forEach(this::removePopulation);
 			populations.forEach(population -> population.played(false));
 			clones.forEach(this::addPopulation);
@@ -182,34 +182,34 @@ public class Game implements Runnable
 
 			int height = board.getHeight(), width = board.getWidth();
 
-			int randomTileUpdates = (int) ((height * width) * 0.2F);
+			int randomTileUpdates = (int) ((height * width) * 0.2D);
 
 			for(int k = 0; k < randomTileUpdates; k++)
 			{
 				Position rnd = board.randomPos();
-				ArrayList<Update> updates = toUpdate.get(rnd);
+				ArrayList<TileUpdate> tileUpdates = pendingUpdates.get(rnd);
 
-				if(updates != null && !updates.isEmpty())
+				if(tileUpdates != null && !tileUpdates.isEmpty())
 				{
-					Update update = updates.get(0);
+					TileUpdate tileUpdate = tileUpdates.get(0);
 
-					if(update.canUpdate())
+					if(tileUpdate.canUpdate())
 					{
-						board.setSceneryAt(rnd, Scenery.byId(update.getPrevSymbol()));
+						board.setSceneryAt(rnd, Scenery.byId(tileUpdate.getPrevSymbol()));
 
-						updates.remove(0);
-						tileUpdates.add(rnd);
+						tileUpdates.remove(0);
+						this.tileUpdates.add(rnd);
 					}
 					else
 					{
-						update.countDown();
+						tileUpdate.countDown();
 					}
 				}
 			}
 
 			ticks++;
 
-			Platform.runLater(() -> controller.updateScreen(getPopulations(), tileUpdates, getMarkers()));
+			Platform.runLater(() -> controller.updateScreen(tileUpdates));
 
 			try
 			{
@@ -232,13 +232,27 @@ public class Game implements Runnable
 
 		if(id == 0 || population.isOnOwnAutomaton())
 		{
-			Action[] actions = Action.byId(0);
+			Action[] actions = Action.byId(0); // n e s w
 
 			Position self = population.getPosition();
-			Position n = board.torusPos(self.getX(), self.getY() - 1);
-			Position e = board.torusPos(self.getX() + 1, self.getY());
-			Position s = board.torusPos(self.getX(), self.getY() + 1);
-			Position w = board.torusPos(self.getX() - 1, self.getY());
+			int x = self.getX(), y = self.getY();
+			Position n = board.torusPos(x, y - 1);
+			Position e = board.torusPos(x + 1, y);
+			Position s = board.torusPos(x, y + 1);
+			Position w = board.torusPos(x - 1, y);
+
+			Position marker = markers.get(population.getPlayer());
+
+			if(marker != null)
+			{
+				int markerX = marker.getX(), markerY = marker.getY();
+				int c1 = x - markerX, c2 = y - markerY;
+				int minH1 = -c1, minH2 = c1 + getWidth() - 1, minV1 = -c2, minV2 = c2 + getHeight() - 1;
+				int orientX = (c1 < 0) ? ((minH1 < minH2) ? 1 : 3) : ((c1 > 0) ? ((minH1 < minH2) ? 3 : 1) : ((int) (Math.random() * 2.0D) == 0 ? 1 : 3));
+				int orientY = (c2 < 0) ? ((minV1 < minV2) ? 2 : 0) : ((c2 > 0) ? ((minV1 < minV2) ? 0 : 2) : ((int) (Math.random() * 2.0D) == 0 ? 0 : 2));
+
+				return actions[(int) (Math.random() * 2.0D) == 0 ? orientX : orientY];
+			}
 
 			List<Action> l = new ArrayList<>();
 
@@ -348,6 +362,14 @@ public class Game implements Runnable
 		return false;
 	}
 
+	private boolean hasOwnMarkerOnSelf(Population population)
+	{
+		Position position = markers.get(population.getPlayer());
+
+		return position != null && position.equals(population.getPosition());
+
+	}
+
 	private boolean canMoveTo(Population population, Position position)
 	{
 		return board.getSceneryAt(position).getSymbol() != 0 && !population.comesFrom(position);
@@ -432,7 +454,13 @@ public class Game implements Runnable
 				Position position = board.torusPos(x + ox, y + oy);
 
 				board.setSceneryAt(position, Scenery.byId(automaton.initialAction(x, y)));
-				tileUpdates.add(position);
+
+				if(ticks > 0)
+				{
+					pendingUpdates.remove(position);
+
+					tileUpdates.add(position);
+				}
 			}
 		}
 	}

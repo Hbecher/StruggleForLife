@@ -10,7 +10,7 @@
     <file url="file://$PROJECT_DIR$/src/org/angryautomata/game/Population.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/org/angryautomata/game/Position.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/org/angryautomata/game/Scheduler.java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/org/angryautomata/game/Update.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/org/angryautomata/game/TileUpdate.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/org/angryautomata/game/action/Action.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/org/angryautomata/game/scenery/Desert.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/org/angryautomata/game/scenery/Forest.java" charset="UTF-8" />

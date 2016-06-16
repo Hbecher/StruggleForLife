@@ -3,17 +3,14 @@ package org.angryautomata;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.angryautomata.game.Automaton;
-import org.angryautomata.game.Board;
-import org.angryautomata.game.Game;
-import org.angryautomata.game.Position;
+import org.angryautomata.game.*;
 
 public class Main extends Application
 {
 	@Override
 	public void start(Stage primaryStage)
 	{
-		Position origin1 = new Position(0, 0);
+		Position origin1 = new Position(0, 62);
 		int[][] transitions1 = {
 				{0},
 				{0},
@@ -64,7 +61,7 @@ public class Main extends Application
 		Automaton automaton3 = new Automaton(transitions3, actions3, origin3);
 		Player player3 = new Player(automaton3, "SonAutomateMeh", 0xFFFF00FF);
 
-		Board board = new Board(64, 64);
+		Board board = new Board(128, 128);
 
 		Controller root = new Controller();
 		Game game = new Game(root, board, player1, player2, player3);

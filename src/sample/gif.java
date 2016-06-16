@@ -239,7 +239,7 @@ public class gif extends Application {
         ImageView imageViewinvalid5 = new ImageView(invalid);
         gridpane.add(imageViewinvalid5, 10, 6);
 
-        // Display image on screen
+        // Display image on coloredScreen
         root.getChildren().add(gridpane);
         primaryStage.setTitle("test animated");
         primaryStage.setScene(scene);

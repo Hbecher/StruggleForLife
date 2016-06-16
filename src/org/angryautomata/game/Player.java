@@ -1,12 +1,10 @@
-package org.angryautomata;
+package org.angryautomata.game;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import javafx.scene.paint.Color;
-import org.angryautomata.game.Automaton;
-import org.angryautomata.game.Population;
 
 public class Player
 {
