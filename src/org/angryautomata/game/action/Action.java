@@ -3,21 +3,59 @@ package org.angryautomata.game.action;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.scene.image.Image;
 import org.angryautomata.game.Game;
 import org.angryautomata.game.Population;
 
 public abstract class Action
 {
 	private final int id;
+	private final Image back, front, trapBack, trapFront, from, to;
 
-	protected Action(int id)
+	protected Action(int id, Image back, Image front, Image trapBack, Image trapFront, Image from, Image to)
 	{
 		this.id = id;
+		this.back = back;
+		this.front = front;
+		this.trapBack = trapBack;
+		this.trapFront = trapFront;
+		this.from = from;
+		this.to = to;
 	}
 
 	public int getId()
 	{
 		return id;
+	}
+
+	public Image getBackImage()
+	{
+		return back;
+	}
+
+	public Image getFrontImage()
+	{
+		return front;
+	}
+
+	public Image getTrapBackImage()
+	{
+		return trapBack;
+	}
+
+	public Image getTrapFrontImage()
+	{
+		return trapFront;
+	}
+
+	public Image getFromImage()
+	{
+		return from;
+	}
+
+	public Image getToImage()
+	{
+		return to;
 	}
 
 	public abstract void execute(Game game, Population population);

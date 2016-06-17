@@ -12,9 +12,12 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.angryautomata.game.*;
@@ -36,8 +39,11 @@ public class Controller extends BorderPane
 	public Button pauseOrResumeButton, stopButton, quitButton;
 	@FXML
 	public Canvas colorCanvas, screen, overlay;
+	@FXML
+	public GridPane gifScreen;
 	private Game game = null;
 	private Position selection = null;
+	private ImageView[][][] tab3d = null;
 
 	public Controller()
 	{
@@ -69,11 +75,28 @@ public class Controller extends BorderPane
 
 		this.game = game;
 
-		int height = (SQUARE_SIZE + 1) * game.getHeight() + 1, width = (SQUARE_SIZE + 1) * game.getWidth() + 1;
-		screen.setHeight(height);
-		screen.setWidth(width);
-		overlay.setHeight(height);
-		overlay.setWidth(width);
+		//int height = (SQUARE_SIZE + 1) * game.getHeight() + 1, width = (SQUARE_SIZE + 1) * game.getWidth() + 1;
+		int height = game.getHeight(), width = game.getWidth();
+		//screen.setHeight(height);
+		//screen.setWidth(width);
+		overlay.setHeight(height * SQUARE_SIZE);
+		overlay.setWidth(width * SQUARE_SIZE);
+
+		tab3d = new ImageView[height][width][8];
+
+		for(int y = 0; y < height; y++)
+		{
+			for(int x = 0; x < width; x++)
+			{
+				for(int z = 0; z < 8; z++)
+				{
+					ImageView imageView = new ImageView(Images.vide);
+
+					tab3d[y][x][z] = imageView;
+					gifScreen.add(imageView, x, y);
+				}
+			}
+		}
 
 		tickSpeed.valueProperty().addListener((observable, oldValue, newValue) ->
 		{
@@ -102,7 +125,7 @@ public class Controller extends BorderPane
 
 	private void init()
 	{
-		GraphicsContext gc = screen.getGraphicsContext2D();
+		/*GraphicsContext gc = screen.getGraphicsContext2D();
 		final int height = game.getHeight(), width = game.getWidth();
 
 		gc.clearRect(0.0D, 0.0D, screen.getWidth(), screen.getHeight());
@@ -129,6 +152,15 @@ public class Controller extends BorderPane
 				gc.setFill(game.getSceneryAt(game.torusPos(j, i)).getColor());
 				gc.fillRect(posToCanvas(j), posToCanvas(i), SQUARE_SIZE, SQUARE_SIZE);
 			}
+		}*/
+		final int height = game.getHeight(), width = game.getWidth();
+
+		for(int x = 0; x < width; x++)
+		{
+			for(int y = 0; y < height; y++)
+			{
+				setImage(x, y, 0, game.getSceneryAt(new Position(x, y)).getImage());
+			}
 		}
 
 		updateOverlay();
@@ -140,44 +172,71 @@ public class Controller extends BorderPane
 		final List<Population> populations = game.getPopulations();
 		final Map<Player, Position> markers = game.getMarkers();
 
-		final GraphicsContext gc = screen.getGraphicsContext2D();
+		//final GraphicsContext gc = screen.getGraphicsContext2D();
 
 		while(!tileUpdates.isEmpty())
 		{
 			Position position = tileUpdates.poll();
 
-			gc.setFill(game.getSceneryAt(position).getColor());
-			gc.fillRect(posToCanvas(position.getX()), posToCanvas(position.getY()), SQUARE_SIZE, SQUARE_SIZE);
+			clearImageView(position.getX(), position.getY());
+			setImage(position.getX(), position.getY(), 0, game.getSceneryAt(position).getImage());
+			/*gc.setFill(game.getSceneryAt(position).getColor());
+			gc.fillRect(posToCanvas(position.getX()), posToCanvas(position.getY()), SQUARE_SIZE, SQUARE_SIZE);*/
 		}
 
 		for(Population population : populations)
 		{
-			Position position = population.getPosition(), previous = population.getPreviousPosition();
+			Position previous = population.getPreviousPosition();
 
-			gc.setFill(game.getSceneryAt(previous).getColor());
+			/*gc.setFill(game.getSceneryAt(previous).getColor());
 			gc.fillRect(posToCanvas(previous.getX()), posToCanvas(previous.getY()), SQUARE_SIZE, SQUARE_SIZE);
 
 			gc.setFill(game.getSceneryAt(position).getColor());
-			gc.fillRect(posToCanvas(position.getX()), posToCanvas(position.getY()), SQUARE_SIZE, SQUARE_SIZE);
+			gc.fillRect(posToCanvas(position.getX()), posToCanvas(position.getY()), SQUARE_SIZE, SQUARE_SIZE);*/
+			setImage(previous.getX(), previous.getY(), 6, Images.vide);
 		}
 
 		for(Population population : populations)
 		{
 			Position position = population.getPosition();
 			int gradient = population.getGradient();
+			Image image;
 
-			double x = gradient >= Population.GRADIENT_MAX ? SQUARE_SIZE / 4.0D : gradient * 0.12D + 4.0D, length = 2.0D * x, offset = SQUARE_SIZE / 2.0D - x;
+			if(gradient <= 5)
+			{
+				image = Images.pop5;
+			}
+			else if(gradient > 5 && gradient <= 25)
+			{
+				image = Images.pop25;
+			}
+			else if(gradient > 25 && gradient <= 50)
+			{
+				image = Images.pop50;
+			}
+			else if(gradient > 50 && gradient <= 75)
+			{
+				image = Images.pop75;
+			}
+			else
+			{
+				image = Images.pop95;
+			}
+
+			setImage(position.getX(), position.getY(), 6, image);
+
+			/*double x = gradient >= Population.GRADIENT_MAX ? SQUARE_SIZE / 4.0D : gradient * 0.12D + 4.0D, length = 2.0D * x, offset = SQUARE_SIZE / 2.0D - x;
 
 			gc.setFill(population.getColor());
-			gc.fillRect(posToCanvas(position.getX()) + offset, posToCanvas(position.getY()) + offset, length, length);
+			gc.fillRect(posToCanvas(position.getX()) + offset, posToCanvas(position.getY()) + offset, length, length);*/
 		}
 
 		for(Map.Entry<Player, Position> entry : markers.entrySet())
 		{
 			Position position = entry.getValue();
 
-			gc.setFill(entry.getKey().getColor());
-			gc.fillOval(posToCanvas(position.getX()) + 12.0D, posToCanvas(position.getY()) + 12.0D, 8.0D, 8.0D);
+			/*gc.setFill(entry.getKey().getColor());
+			gc.fillOval(posToCanvas(position.getX()) + 12.0D, posToCanvas(position.getY()) + 12.0D, 8.0D, 8.0D);*/
 		}
 
 		updateData();
@@ -186,12 +245,12 @@ public class Controller extends BorderPane
 
 	private double posToCanvas(int pos)
 	{
-		return pos * (SQUARE_SIZE + 1.0D) + 1.0D;
+		return pos * SQUARE_SIZE;//pos * (SQUARE_SIZE + 1.0D) + 1.0D;
 	}
 
 	private int canvasToPos(double pos)
 	{
-		return (int) ((pos - 1.0D) / (SQUARE_SIZE + 1.0D));
+		return (int) (pos / SQUARE_SIZE);//(int) ((pos - 1.0D) / (SQUARE_SIZE + 1.0D));
 	}
 
 	private void updateOverlay()
@@ -211,7 +270,7 @@ public class Controller extends BorderPane
 			Automaton automaton = player.getAutomaton();
 			Position origin = automaton.getOrigin();
 			double x = posToCanvas(origin.getX()) - 2.0D, y = posToCanvas(origin.getY()) - 2.0D;
-			double xl = (SQUARE_SIZE + 1.0D) * automaton.numberOfStates(), yl = (SQUARE_SIZE + 1.0D) * Scenery.sceneries();
+			double xl = SQUARE_SIZE * automaton.numberOfStates(), yl = SQUARE_SIZE * Scenery.sceneries();
 
 			gc.setFill(player.getColor());
 			gc.fillRect(x, y, xl + 3.0D, 3.0D);
@@ -228,7 +287,7 @@ public class Controller extends BorderPane
 			final GraphicsContext gc = overlay.getGraphicsContext2D();
 
 			double x = posToCanvas(selection.getX()) - 0.5D, y = posToCanvas(selection.getY()) - 0.5D;
-			double xx = x + SQUARE_SIZE + 1.0D, yy = y + SQUARE_SIZE + 1.0D;
+			double xx = x + SQUARE_SIZE, yy = y + SQUARE_SIZE;
 
 			gc.setStroke(Color.BLACK);
 			gc.setLineWidth(3.0D);
@@ -379,5 +438,32 @@ public class Controller extends BorderPane
 	public Position getSelection()
 	{
 		return selection;
+	}
+
+	private ImageView getImageView(int x, int y, int z)
+	{
+		try
+		{
+			return tab3d[y][x][z];
+		}
+		catch(ArrayIndexOutOfBoundsException e)
+		{
+			System.out.println(x + " " + y + " " + z);
+		}
+
+		return null;
+	}
+
+	private void setImage(int x, int y, int z, Image image)
+	{
+		getImageView(x, y, z).setImage(image);
+	}
+
+	private void clearImageView(int x, int y)
+	{
+		for(int z = 0; z < 8; z++)
+		{
+			setImage(x, y, z, Images.vide);
+		}
 	}
 }

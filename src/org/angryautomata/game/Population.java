@@ -84,9 +84,9 @@ public class Population
 		return gradient >= GRADIENT_MAX;
 	}
 
-	public Population createClone()
+	public Population createClone(Game game)
 	{
-		Position clonePos = new Position(position.getX() + (int) (Math.random() * 3.0D) - 1, position.getY() + (int) (Math.random() * 3.0D) - 1);
+		Position clonePos = game.torusPos(position.getX() + (int) (Math.random() * 3.0D) - 1, position.getY() + (int) (Math.random() * 3.0D) - 1);
 
 		Population clone = new Population(player, 0, clonePos);
 

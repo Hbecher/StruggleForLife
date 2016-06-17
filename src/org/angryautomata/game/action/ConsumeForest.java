@@ -1,6 +1,7 @@
 package org.angryautomata.game.action;
 
 import org.angryautomata.game.Game;
+import org.angryautomata.game.Images;
 import org.angryautomata.game.Population;
 import org.angryautomata.game.Position;
 import org.angryautomata.game.scenery.Meadow;
@@ -10,7 +11,7 @@ public class ConsumeForest extends Action
 {
 	public ConsumeForest()
 	{
-		super(6);
+		super(6, Images.forage_back, Images.forage, Images.forage_trapped_back, Images.forage_trapped, Images.vide, Images.vide);
 	}
 
 	@Override

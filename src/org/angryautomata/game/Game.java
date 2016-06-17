@@ -107,10 +107,8 @@ public class Game implements Runnable
 						ppp.updateGradient(-GRADIENT_COMBAT);
 						pp.updateGradient(GRADIENT_COMBAT);
 					}
-					else
-					{
-						ppp.moveTo(ppp.getPreviousPosition());
-					}
+
+					ppp.moveTo(ppp.getPreviousPosition());
 
 					if(ppp.isDead())
 					{
@@ -130,7 +128,7 @@ public class Game implements Runnable
 
 				if(population.canClone())
 				{
-					clones.add(population.createClone());
+					clones.add(population.createClone(this));
 				}
 				else
 				{
@@ -156,12 +154,13 @@ public class Game implements Runnable
 					dead.add(population);
 
 					tileUpdates.add(population.getPreviousPosition());
-					tileUpdates.add(population.getPosition());
 				}
 				else
 				{
 					population.nextState(o.getFakeSymbol());
 				}
+
+				tileUpdates.add(population.getPosition());
 
 				population.played(true);
 			});

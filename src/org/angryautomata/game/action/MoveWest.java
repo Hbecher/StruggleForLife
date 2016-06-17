@@ -1,6 +1,7 @@
 package org.angryautomata.game.action;
 
 import org.angryautomata.game.Game;
+import org.angryautomata.game.Images;
 import org.angryautomata.game.Population;
 import org.angryautomata.game.Position;
 
@@ -8,7 +9,7 @@ public class MoveWest extends Action
 {
 	public MoveWest()
 	{
-		super(0);
+		super(0, Images.vide, Images.vide, Images.vide, Images.vide, Images.popmigratega, Images.popmigrategb);
 	}
 
 	@Override

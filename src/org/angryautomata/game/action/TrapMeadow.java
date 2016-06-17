@@ -1,6 +1,7 @@
 package org.angryautomata.game.action;
 
 import org.angryautomata.game.Game;
+import org.angryautomata.game.Images;
 import org.angryautomata.game.Population;
 import org.angryautomata.game.Position;
 
@@ -8,7 +9,7 @@ public class TrapMeadow extends Action
 {
 	public TrapMeadow()
 	{
-		super(3);
+		super(3, Images.forage_trapped_back, Images.trap, Images.forage_trapped_back, Images.trap, Images.vide, Images.vide);
 	}
 
 	@Override
