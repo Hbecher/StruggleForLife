@@ -357,6 +357,13 @@ public class Controller extends BorderPane
 		}
 	}
 
+	@FXML
+	public void test(ActionEvent e)
+	{
+		Stage stage = (Stage) getScene().getWindow();
+		stage.setFullScreen(!stage.isFullScreen());
+	}
+
 	public Position getSelection()
 	{
 		return selection;

@@ -4,7 +4,12 @@ public class Automaton
 {
 	private final int[][] transitions;
 	private final int[][] actions;
-	private final Position origin;
+	private Position origin;
+
+	public Automaton(int[][] transitions, int[][] actions)
+	{
+		this(transitions, actions, null);
+	}
 
 	public Automaton(int[][] transitions, int[][] actions, Position origin)
 	{
@@ -31,5 +36,10 @@ public class Automaton
 	public Position getOrigin()
 	{
 		return origin;
+	}
+
+	public void setOrigin(Position origin)
+	{
+		this.origin = origin;
 	}
 }

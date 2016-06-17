@@ -4,6 +4,8 @@ import org.angryautomata.game.scenery.Scenery;
 
 public class Board
 {
+	public static final int MAX_SIZE = 128;
+
 	private final Scenery[][] terrain;
 	private final int height, width;
 
