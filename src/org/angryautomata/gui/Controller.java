@@ -87,6 +87,8 @@ public class Controller extends BorderPane
 			playersBox.getItems().add(player.getName());
 		}
 
+		playersBox.getItems().sort((o1, o2) -> game.getPlayer(o1).getPlayerNumber() - game.getPlayer(o2).getPlayerNumber());
+
 		playersBox.valueProperty().addListener((observable, oldValue, newValue) ->
 		{
 			if(!newValue.equals(oldValue))
@@ -268,11 +270,21 @@ public class Controller extends BorderPane
 	{
 		Player player = game.getPlayer(playersBox.getValue());
 
-		if(player != null && !player.isDead())
+		if(player != null)
 		{
-			placeMarker.setDisable(!player.canPlaceMarker());
-			eraseMarker.setDisable(!game.hasMarker(player));
-			regenAutomaton.setDisable(!player.canRegenAutomaton());
+			System.out.println(player.isDead());
+			if(!player.isDead())
+			{
+				placeMarker.setDisable(!player.canPlaceMarker());
+				eraseMarker.setDisable(!game.hasMarker(player));
+				regenAutomaton.setDisable(!player.canRegenAutomaton());
+			}
+			else
+			{
+				placeMarker.setDisable(true);
+				eraseMarker.setDisable(true);
+				regenAutomaton.setDisable(true);
+			}
 		}
 		else
 		{
@@ -349,7 +361,7 @@ public class Controller extends BorderPane
 	@FXML
 	public void onOverlayMouseClicked(MouseEvent e)
 	{
-		if(e.getButton() == MouseButton.SECONDARY || e.getClickCount() > 1)
+		if(e.getButton() == MouseButton.SECONDARY || (e.getButton() == MouseButton.PRIMARY && e.getClickCount() > 1))
 		{
 			selection = new Position(canvasToPos(e.getX()), canvasToPos(e.getY()));
 

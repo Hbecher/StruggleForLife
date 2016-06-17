@@ -8,19 +8,28 @@ import javafx.scene.paint.Color;
 
 public class Player
 {
+	private static final Color[] PLAYER_COLORS = {Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.ORANGE, Color.PURPLE, Color.BROWN, Color.GRAY};
 	private static final int MARKER_COOLDOWN = 100, REGEN_COOLDOWN = 100;
 
 	private final Automaton automaton;
 	private final String name;
+	private final int playerNumber;
 	private final Color color;
 	private final List<Population> populations = new ArrayList<>();
+	private Team team = Team.NO_TEAM;
 	private int markerCooldown = MARKER_COOLDOWN, regenCooldown = REGEN_COOLDOWN;
 
-	public Player(Automaton automaton, String name, int rgb)
+	public Player(Automaton automaton, String name, int playerNumber)
 	{
 		this.automaton = automaton;
 		this.name = name;
-		color = Color.rgb((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF);
+		this.playerNumber = playerNumber;
+		color = PLAYER_COLORS[playerNumber];
+	}
+
+	public static Color color(int playerNumber)
+	{
+		return PLAYER_COLORS[playerNumber];
 	}
 
 	public Automaton getAutomaton()
@@ -51,6 +60,11 @@ public class Player
 		return populations.remove(population);
 	}
 
+	public int getPlayerNumber()
+	{
+		return playerNumber;
+	}
+
 	public Color getColor()
 	{
 		return color;
@@ -75,6 +89,11 @@ public class Player
 
 	public boolean isDead()
 	{
+		if(populations.isEmpty())
+		{
+			return true;
+		}
+
 		for(Population population : populations)
 		{
 			if(population.isDead())
@@ -116,5 +135,20 @@ public class Player
 	public boolean canRegenAutomaton()
 	{
 		return regenCooldown <= 0;
+	}
+
+	public Team getTeam()
+	{
+		return team;
+	}
+
+	public void setTeam(Team team)
+	{
+		this.team = team == null ? Team.NO_TEAM : team;
+	}
+
+	public boolean isTeammate(Player player)
+	{
+		return player.getTeam().isTeammate(this);
 	}
 }

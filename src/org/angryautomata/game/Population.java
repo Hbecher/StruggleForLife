@@ -8,17 +8,15 @@ public class Population
 	public static final int GRADIENT_MIN = 0, GRADIENT_MAX = 100, GRADIENT_INIT = 50;
 
 	private final Player player;
-	private final int team;
 	private int state;
 	private int gradient = GRADIENT_INIT;
 	private Position position, prev;
 	private boolean hasPlayed = false;
 
-	public Population(Player player, int state, int team, Position position)
+	public Population(Player player, int state, Position position)
 	{
 		this.player = player;
 		this.state = state;
-		this.team = team;
 		this.position = position;
 		prev = position;
 
@@ -45,9 +43,9 @@ public class Population
 		return gradient;
 	}
 
-	public int getTeam()
+	public Team getTeam()
 	{
-		return team;
+		return player.getTeam();
 	}
 
 	public Position getPosition()
@@ -90,7 +88,7 @@ public class Population
 	{
 		Position clonePos = new Position(position.getX() + (int) (Math.random() * 3.0D) - 1, position.getY() + (int) (Math.random() * 3.0D) - 1);
 
-		Population clone = new Population(player, 0, team, clonePos);
+		Population clone = new Population(player, 0, clonePos);
 
 		clone.updateGradient(-GRADIENT_INIT);
 
@@ -107,7 +105,7 @@ public class Population
 		player.removePopulation(this);
 	}
 
-	public boolean isOnOwnAutomaton()
+	public boolean isOnTeamAutomaton()
 	{
 		Automaton automaton = player.getAutomaton();
 		Position origin = automaton.getOrigin();
@@ -122,9 +120,9 @@ public class Population
 		return prev.equals(position);
 	}
 
-	public boolean isOnSameTeamAs(Population population)
+	public boolean isTeammate(Population population)
 	{
-		return team == population.getTeam();
+		return player.isTeammate(population.getPlayer());
 	}
 
 	public boolean hasPlayed()

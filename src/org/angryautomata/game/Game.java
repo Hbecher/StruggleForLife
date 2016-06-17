@@ -16,7 +16,7 @@ public class Game implements Runnable
 	private static final int GRADIENT_COMBAT = 10;
 
 	private final Board board;
-	private final Player[] players;
+	private final List<Player> players;
 	private final List<Population> populations = new ArrayList<>();
 	private final Map<Position, ArrayList<TileUpdate>> pendingUpdates = new HashMap<>();
 	private final Map<Player, Position> markers = new HashMap<>();
@@ -27,20 +27,19 @@ public class Game implements Runnable
 	private int ticks = 0;
 	private CountDownLatch tickWait = new CountDownLatch(1);
 
-	public Game(Controller controller, Board board, Player... players)
+	public Game(Controller controller, Board board, List<Player> players)
 	{
 		this.controller = controller;
 		this.board = board;
 		this.players = players;
 
-		if(players == null || players.length < 1)
+		if(players == null || players.isEmpty())
 		{
 			throw new RuntimeException("There must be at least one player!");
 		}
 
-		for(int i = 0; i < players.length; i++)
+		for(Player player : players)
 		{
-			Player player = players[i];
 			Automaton automaton = player.getAutomaton();
 
 			regenAutomaton(player);
@@ -50,7 +49,7 @@ public class Game implements Runnable
 			int ox = origin.getX(), oy = origin.getY();
 			Position position = (int) (Math.random() * 2.0D) == 0 ? new Position(ox + (int) (Math.random() * states), oy + (int) (Math.random() * 2.0D) * actions) : new Position(ox + (int) (Math.random() * 2.0D) * states, oy + (int) (Math.random() * actions));
 
-			addPopulation(new Population(player, 0, i, position));
+			addPopulation(new Population(player, 0, position));
 		}
 	}
 
@@ -103,7 +102,7 @@ public class Game implements Runnable
 
 				for(Population ppp : p)
 				{
-					if(!ppp.isOnSameTeamAs(pp))
+					if(!ppp.isTeammate(pp))
 					{
 						ppp.updateGradient(-GRADIENT_COMBAT);
 						pp.updateGradient(GRADIENT_COMBAT);
@@ -241,7 +240,7 @@ public class Game implements Runnable
 		Position origin = population.getPlayer().getAutomaton().getOrigin();
 		int id = board.getSceneryAt(board.torusPos(origin.getX() + state, origin.getY() + o.getFakeSymbol())).getSymbol();
 
-		if(id == 0 || population.isOnOwnAutomaton())
+		if(id == 0 || population.isOnTeamAutomaton())
 		{
 			Action[] actions = Action.byId(0); // n e s w
 
@@ -446,9 +445,9 @@ public class Game implements Runnable
 		return board.torusPos(x, y);
 	}
 
-	public Player[] getPlayers()
+	public List<Player> getPlayers()
 	{
-		return players;
+		return Collections.unmodifiableList(players);
 	}
 
 	public void regenAutomaton(Player player)

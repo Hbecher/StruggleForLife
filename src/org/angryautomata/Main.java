@@ -1,17 +1,18 @@
 package org.angryautomata;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.angryautomata.game.*;
 import org.angryautomata.game.scenery.Scenery;
 import org.angryautomata.gui.Controller;
+import org.angryautomata.xml.XMLParser;
 
 public class Main extends Application
 {
@@ -31,41 +32,37 @@ public class Main extends Application
 		fileChooser.setTitle("Struggle for Life - choix des automates");
 		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Fichier automate (*.xml)", "*.xml"), new FileChooser.ExtensionFilter("Tous les fichiers", "*.*"));
 
+		try
+		{
+			File currentDir = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();
+
+			fileChooser.setInitialDirectory(currentDir);
+		}
+		catch(Exception ignored)
+		{
+		}
+
 		List<File> selectedFiles = fileChooser.showOpenMultipleDialog(primaryStage);
 
-		/*if(selectedFiles == null)
+		if(selectedFiles == null)
 		{
 			primaryStage.close();
-
 			Platform.exit();
 
 			return;
-		}*/
+		}
 
-		// XMLReader renvoie une liste de joueurs dont la position initiale de leur automate n'est pas spécifiée
-		// XMLReader.read(File[] ou List<File>) -> Player[] ou List<Player>
-		////////
-		List<Player> players = new ArrayList<>();
+		XMLParser parser = new XMLParser(selectedFiles);
+		parser.parse();
+		List<Player> players = parser.getPlayers();
 
-		int[][] transitions = {
-				{0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-				{0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-				{0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-				{0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-		};
-		int[][] actions = {
-				{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // desert
-				{2, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // lac
-				{4, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // prairie
-				{6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}  // foret
-		};
+		if(players == null || players.isEmpty())
+		{
+			primaryStage.close();
+			Platform.exit();
 
-		Player player1 = new Player(new Automaton(transitions, actions, Position.ORIGIN), "MonAutomateCool", 0xBF0D0D);
-		Player player2 = new Player(new Automaton(transitions, actions, Position.ORIGIN), "TonAutomateNase", 0x916012);
-		Player player3 = new Player(new Automaton(transitions, actions, Position.ORIGIN), "SonAutomateMeh", 0xFF00FF);
-
-		Collections.addAll(players, player1, player2, player3);
-		////////
+			return;
+		}
 
 		int maxStates = 0;
 
@@ -79,46 +76,54 @@ public class Main extends Application
 			}
 		}
 
-		int numOfPlayers = players.size();
-		int max = Board.MAX_SIZE / numOfPlayers;
-
-		/*if(max > Board.MAX_SIZE / maxStates)
-		{
-			// erreur
-			primaryStage.close();
-			Platform.exit();
-
-			return;
-		}*/
+		final int padding = 4;
+		int maxPerLine = Board.MAX_SIZE / (maxStates + 2 * padding), onLine = 0;
 
 		Collections.shuffle(players);
-		int x = 0, y = 0, xmax = 0;
+		int x = 0, y = 0, xmax = 0, ymax = 0;
 
 		for(Player player : players)
 		{
-			if(x > max)
+			if(onLine > maxPerLine)
 			{
 				x = 0;
-				y += Scenery.sceneries() + 4;
+				y += Scenery.sceneries() + padding;
 			}
 
 			Automaton automaton = player.getAutomaton();
+			int ax = x + (int) (Math.random() * padding), ay = y + (int) (Math.random() * Scenery.sceneries());
 
-			automaton.setOrigin(new Position(x + (int) (Math.random() * 4.0D), y + (int) (Math.random() * Scenery.sceneries())));
+			automaton.setOrigin(new Position(ax, ay));
 
-			if(automaton.getOrigin().getX() + automaton.numberOfStates() > xmax)
+			if(ax + automaton.numberOfStates() > xmax)
 			{
-				xmax = automaton.getOrigin().getX() + automaton.numberOfStates();
+				xmax = ax + automaton.numberOfStates();
 			}
 
-			x += maxStates + 4;
+			if(ay + Scenery.sceneries() > ymax)
+			{
+				ymax = ay + Scenery.sceneries();
+			}
+
+			x += maxStates + padding;
+			onLine++;
 		}
 
-		int width = xmax + (int) (Math.random() * 4.0D), height = y + Scenery.sceneries() + (int) (Math.random() * 4.0D);
+		int width = xmax + (int) (Math.random() * padding), height = ymax + (int) (Math.random() * padding);
+
+		if(width < 16)
+		{
+			width = 16;
+		}
+
+		if(height < 8)
+		{
+			height = 8;
+		}
 
 		Board board = new Board(width, height);
 
-		Game game = new Game(root, board, player1, player2, player3);
+		Game game = new Game(root, board, players);
 		root.setGame(game);
 
 		Thread gameThread = new Thread(game, "Game loop thread");
