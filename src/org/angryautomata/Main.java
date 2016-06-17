@@ -48,16 +48,16 @@ public class Main extends Application
 		List<Player> players = new ArrayList<>();
 
 		int[][] transitions = {
-				{0, 2, 1},
-				{0, 1, 1},
-				{0, 2, 2},
-				{0, 1, 2}
+				{0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+				{0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+				{0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+				{0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 		};
 		int[][] actions = {
-				{0, 0, 0}, // desert
-				{2, 1, 2}, // lac
-				{4, 4, 3}, // prairie
-				{6, 6, 6}  // foret
+				{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // desert
+				{2, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // lac
+				{4, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // prairie
+				{6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}  // foret
 		};
 
 		Player player1 = new Player(new Automaton(transitions, actions, Position.ORIGIN), "MonAutomateCool", 0xBF0D0D);
@@ -79,33 +79,42 @@ public class Main extends Application
 			}
 		}
 
-		Collections.shuffle(players);
-
-		Position position = Position.ORIGIN;
 		int numOfPlayers = players.size();
+		int max = Board.MAX_SIZE / numOfPlayers;
 
-		for(int i = 0; i < numOfPlayers; i++)
+		/*if(max > Board.MAX_SIZE / maxStates)
 		{
-			Automaton automaton = players.remove(0).getAutomaton();
-			Position origin = automaton.getOrigin();
-			int width = automaton.numberOfStates(), height = Scenery.sceneries();
-			boolean overlaps = false;
+			// erreur
+			primaryStage.close();
+			Platform.exit();
 
-			for(Player player : players)
+			return;
+		}*/
+
+		Collections.shuffle(players);
+		int x = 0, y = 0, xmax = 0;
+
+		for(Player player : players)
+		{
+			if(x > max)
 			{
-				Position other = player.getAutomaton().getOrigin();
-				int otherWidth = automaton.numberOfStates(), otherHeight = Scenery.sceneries();
-
-				if(origin.getX() > other.getX() - width && origin.getX() < other.getY() + otherWidth)
-				{
-					overlaps = true;
-
-					break;
-				}
+				x = 0;
+				y += Scenery.sceneries() + 4;
 			}
+
+			Automaton automaton = player.getAutomaton();
+
+			automaton.setOrigin(new Position(x + (int) (Math.random() * 4.0D), y + (int) (Math.random() * Scenery.sceneries())));
+
+			if(automaton.getOrigin().getX() + automaton.numberOfStates() > xmax)
+			{
+				xmax = automaton.getOrigin().getX() + automaton.numberOfStates();
+			}
+
+			x += maxStates + 4;
 		}
 
-		int width = 128, height = 128;
+		int width = xmax + (int) (Math.random() * 4.0D), height = y + Scenery.sceneries() + (int) (Math.random() * 4.0D);
 
 		Board board = new Board(width, height);
 
