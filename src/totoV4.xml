@@ -1,0 +1,25 @@
+<?xml version = "1.0" encoding="UTF-8" standalone="yes" ?>
+<automate>
+<nom>toto</nom>
+<nb_symbole>4</nb_symbole>
+<nb_etat>4</nb_etat>
+<transitions>
+<!-- Etat_in,symbole,action,Etat_out -->
+<transition>0,0,0,1</transition>
+<transition>0,1,1,1</transition>
+<transition>0,2,4,1</transition>
+<transition>0,3,5,1</transition>
+<transition>1,0,0,2</transition>
+<transition>1,1,0,2</transition>
+<transition>1,2,4,2</transition>
+<transition>1,3,6,2</transition>
+<transition>2,0,0,3</transition>
+<transition>2,1,1,3</transition>
+<transition>2,2,4,3</transition>
+<transition>2,3,6,3</transition>
+<transition>3,0,0,0</transition>
+<transition>3,1,0,0</transition>
+<transition>3,2,0,0</transition>
+<transition>3,3,0,0</transition>
+</transitions>
+</automate>
