@@ -6,7 +6,7 @@ import org.angryautomata.game.Position;
 import org.angryautomata.game.scenery.Desert;
 import org.angryautomata.game.scenery.Scenery;
 
-public class ConsumeLake extends Action
+public class ConsumeLake extends Action implements Consume
 {
 	public ConsumeLake()
 	{

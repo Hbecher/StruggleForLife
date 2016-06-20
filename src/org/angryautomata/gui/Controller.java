@@ -17,18 +17,18 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.angryautomata.game.*;
 import org.angryautomata.game.scenery.Scenery;
 
-public class Controller extends BorderPane
+public class Controller extends VBox
 {
 	private static final int SQUARE_SIZE = 32;
 
-	private final Deque<Position> conflicts = new ArrayDeque<>(), consumes = new ArrayDeque<>(), traps = new ArrayDeque<>(), invalids = new ArrayDeque<>();
+	private final Deque<Position> conflicts = new ArrayDeque<>(), consumes = new ArrayDeque<>(), consumesTrap = new ArrayDeque<>(), traps = new ArrayDeque<>(), invalids = new ArrayDeque<>();
 
 	@FXML
 	public MenuItem placeMarker, eraseMarker, regenAutomaton;
@@ -41,7 +41,7 @@ public class Controller extends BorderPane
 	@FXML
 	public Button pauseOrResumeButton, stopButton, quitButton;
 	@FXML
-	public Canvas colorCanvas, overlay;
+	public Canvas colorCanvas, gifOverlay, overlay;
 	@FXML
 	public GridPane gifScreen;
 	private Game game = null;
@@ -69,6 +69,9 @@ public class Controller extends BorderPane
 		return game;
 	}
 
+	/**
+	 * @param game le jeu en cours
+	 */
 	public void setGame(Game game)
 	{
 		if(this.game != null)
@@ -79,6 +82,8 @@ public class Controller extends BorderPane
 		this.game = game;
 
 		int height = game.getHeight(), width = game.getWidth();
+		gifOverlay.setHeight(height * SQUARE_SIZE);
+		gifOverlay.setWidth(width * SQUARE_SIZE);
 		overlay.setHeight(height * SQUARE_SIZE);
 		overlay.setWidth(width * SQUARE_SIZE);
 
@@ -123,6 +128,9 @@ public class Controller extends BorderPane
 		init();
 	}
 
+	/**
+	 * Initialise l'affichage
+	 */
 	private void init()
 	{
 		final int height = game.getHeight(), width = game.getWidth();
@@ -139,7 +147,10 @@ public class Controller extends BorderPane
 		updateControls();
 	}
 
-	public void updateScreen(final Deque<Position> tileUpdates, final Deque<Position> conflicts, final Deque<Position> consumes, final Deque<Position> traps, final Deque<Position> invalids)
+	/**
+	 * Appelé à chaque mise à jour d'écran, avec les différentes files de modifications.
+	 */
+	public void updateScreen(final Deque<Position> tileUpdates, final Deque<Position> conflicts, final Deque<Position> consumes, final Deque<Position> consumesTrap, final Deque<Position> traps, final Deque<Position> invalids)
 	{
 		final List<Population> populations = game.getPopulations();
 		final Map<Player, Position> markers = game.getMarkers();
@@ -151,6 +162,7 @@ public class Controller extends BorderPane
 			Scenery scenery = game.getSceneryAt(position);
 			setImage(position.getX(), position.getY(), 0, scenery.getImage());
 			setImage(position.getX(), position.getY(), 2, scenery.isTrapped() ? Images.trapped : Images.vide);
+			setImage(position.getX(), position.getY(), 4, Images.vide);
 		}
 
 		while(!this.conflicts.isEmpty())
@@ -180,12 +192,29 @@ public class Controller extends BorderPane
 		while(!consumes.isEmpty())
 		{
 			Position consume = consumes.poll();
-			Scenery scenery = game.getSceneryAt(consume);
 
-			setImage(consume.getX(), consume.getY(), 1, scenery.isTrapped() ? Images.forage_trapped_back : Images.forage_back);
-			setImage(consume.getX(), consume.getY(), 5, scenery.isTrapped() ? Images.forage_trapped : Images.forage);
+			setImage(consume.getX(), consume.getY(), 1, Images.forage_back);
+			setImage(consume.getX(), consume.getY(), 5, Images.forage);
 
 			this.consumes.add(consume);
+		}
+
+		while(!this.consumesTrap.isEmpty())
+		{
+			Position consumeTrap = this.consumesTrap.poll();
+
+			setImage(consumeTrap.getX(), consumeTrap.getY(), 1, Images.vide);
+			setImage(consumeTrap.getX(), consumeTrap.getY(), 5, Images.vide);
+		}
+
+		while(!consumesTrap.isEmpty())
+		{
+			Position consumeTrap = consumesTrap.poll();
+
+			setImage(consumeTrap.getX(), consumeTrap.getY(), 1, Images.forage_trapped_back);
+			setImage(consumeTrap.getX(), consumeTrap.getY(), 5, Images.forage_trapped);
+
+			this.consumesTrap.add(consumeTrap);
 		}
 
 		while(!this.traps.isEmpty())
@@ -229,6 +258,10 @@ public class Controller extends BorderPane
 			setImage(previous.getX(), previous.getY(), 4, Images.vide);
 		}
 
+		final GraphicsContext gc = gifOverlay.getGraphicsContext2D();
+
+		gc.clearRect(0.0D, 0.0D, gifOverlay.getWidth(), gifOverlay.getHeight());
+
 		for(Population population : populations)
 		{
 			Position position = population.getPosition();
@@ -257,29 +290,51 @@ public class Controller extends BorderPane
 			}
 
 			setImage(position.getX(), position.getY(), 4, image);
+
+			double x = posToCanvas(position.getX()), y = posToCanvas(position.getY());
+			double xx = x + SQUARE_SIZE, yy = y + SQUARE_SIZE;
+
+			gc.setStroke(population.getColor());
+			gc.setLineWidth(2.0D);
+			gc.strokeLine(x, y, x, yy);
+			gc.strokeLine(x, y, xx, y);
+			gc.strokeLine(xx, yy, x, yy);
+			gc.strokeLine(xx, yy, xx, y);
 		}
+
+		double center = SQUARE_SIZE / 2.0D - 6.0D;
 
 		for(Map.Entry<Player, Position> entry : markers.entrySet())
 		{
 			Position marker = entry.getValue();
 
-			//setImage(marker.getX(), marker.getY(), Images.);
+			gc.setFill(entry.getKey().getColor());
+			gc.fillOval(posToCanvas(marker.getX()) + center, posToCanvas(marker.getY()) + center, 12.0D, 12.0D);
 		}
 
 		updateData();
 		updateControls();
 	}
 
+	/**
+	 * Convertit une position en coordonnée sur l'écran
+	 */
 	private double posToCanvas(int pos)
 	{
 		return pos * SQUARE_SIZE;
 	}
 
+	/**
+	 * Convertit une coordonnée sur l'écran en position
+	 */
 	private int canvasToPos(double pos)
 	{
 		return (int) (pos / SQUARE_SIZE);
 	}
 
+	/**
+	 * Met à jour l'écran de sélection et d'affichage des automates
+	 */
 	private void updateOverlay()
 	{
 		overlay.getGraphicsContext2D().clearRect(0.0D, 0.0D, overlay.getWidth(), overlay.getHeight());
@@ -288,6 +343,9 @@ public class Controller extends BorderPane
 		drawSelection();
 	}
 
+	/**
+	 * Dessine les automates
+	 */
 	private void drawAutomata()
 	{
 		final GraphicsContext gc = overlay.getGraphicsContext2D();
@@ -307,6 +365,9 @@ public class Controller extends BorderPane
 		}
 	}
 
+	/**
+	 * Dessine la position sélectionnée
+	 */
 	private void drawSelection()
 	{
 		if(selection != null)
@@ -325,6 +386,9 @@ public class Controller extends BorderPane
 		}
 	}
 
+	/**
+	 * Met à jour les données de la partie
+	 */
 	private void updateData()
 	{
 		ticksLabel.setText(Integer.toString(game.ticks()));
@@ -353,6 +417,9 @@ public class Controller extends BorderPane
 		}
 	}
 
+	/**
+	 * Met à jour les boutons de contrôle en fonction du joueur sélectionné et des actions possibles
+	 */
 	private void updateControls()
 	{
 		Player player = game.getPlayer(playersBox.getValue());
@@ -473,6 +540,9 @@ public class Controller extends BorderPane
 		}
 	}
 
+	/**
+	 * Affiche le vainqueur en fin de partie et désactive les contrôles
+	 */
 	public void displayWinner(String playerName)
 	{
 		winnerLabel.setText(playerName);

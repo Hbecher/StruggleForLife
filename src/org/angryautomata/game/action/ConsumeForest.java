@@ -6,7 +6,7 @@ import org.angryautomata.game.Position;
 import org.angryautomata.game.scenery.Meadow;
 import org.angryautomata.game.scenery.Scenery;
 
-public class ConsumeForest extends Action
+public class ConsumeForest extends Action implements Consume
 {
 	public ConsumeForest()
 	{

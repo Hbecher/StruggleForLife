@@ -4,7 +4,7 @@ import org.angryautomata.game.Game;
 import org.angryautomata.game.Population;
 import org.angryautomata.game.Position;
 
-public class MoveSouth extends Action
+public class MoveSouth extends Action implements Move
 {
 	public MoveSouth()
 	{

@@ -6,7 +6,9 @@ import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import org.angryautomata.game.action.Action;
+import org.angryautomata.game.action.Consume;
 import org.angryautomata.game.action.Nothing;
+import org.angryautomata.game.action.Trap;
 import org.angryautomata.game.scenery.Scenery;
 import org.angryautomata.gui.Controller;
 
@@ -54,7 +56,7 @@ public class Game implements Runnable
 	/**
 	 * Ces listes contiennent les actions à afficher à l'écran
 	 */
-	private final Deque<Position> tileUpdates = new ArrayDeque<>(), conflicts = new ArrayDeque<>(), consumes = new ArrayDeque<>(), traps = new ArrayDeque<>(), invalids = new ArrayDeque<>();
+	private final Deque<Position> tileUpdates = new ArrayDeque<>(), conflicts = new ArrayDeque<>(), consumes = new ArrayDeque<>(), consumesTrap = new ArrayDeque<>(), traps = new ArrayDeque<>(), invalids = new ArrayDeque<>();
 
 	/**
 	 * Le lien entre l'interface utilisateur et le simulateur
@@ -221,6 +223,26 @@ public class Game implements Runnable
 					// le simulateur calcule une action et l'exécute
 					Action action = action(population, o);
 
+					if(action instanceof Nothing)
+					{
+						invalids.add(self);
+					}
+					else if(action instanceof Consume)
+					{
+						if(o.isTrapped())
+						{
+							consumesTrap.add(self);
+						}
+						else
+						{
+							consumes.add(self);
+						}
+					}
+					else if(action instanceof Trap)
+					{
+						traps.add(self);
+					}
+
 					action.execute(this, population);
 
 					// si l'action met à jour la carte, on rajoute une mise à jour de décor
@@ -324,7 +346,7 @@ public class Game implements Runnable
 			ticks++;
 
 			// on affiche le tour
-			Platform.runLater(() -> controller.updateScreen(tileUpdates, conflicts, consumes, traps, invalids));
+			Platform.runLater(() -> controller.updateScreen(tileUpdates, conflicts, consumes, consumesTrap, traps, invalids));
 
 			// si le tour s'est calculé plus vite que l'attente entre deux tours, on attend
 			try

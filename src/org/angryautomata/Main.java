@@ -56,7 +56,7 @@ public class Main extends Application
 		parser.parse();
 		List<Player> players = parser.getPlayers();
 
-		if(players == null || players.isEmpty())
+		if(players == null || players.isEmpty() || players.size() > 8)
 		{
 			primaryStage.close();
 			Platform.exit();

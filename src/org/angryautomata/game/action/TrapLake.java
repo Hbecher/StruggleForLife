@@ -4,7 +4,7 @@ import org.angryautomata.game.Game;
 import org.angryautomata.game.Population;
 import org.angryautomata.game.Position;
 
-public class TrapLake extends Action
+public class TrapLake extends Action implements Trap
 {
 	public TrapLake()
 	{
