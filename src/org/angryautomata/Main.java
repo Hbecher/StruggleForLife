@@ -7,6 +7,7 @@ import java.util.List;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.angryautomata.game.*;
@@ -42,26 +43,42 @@ public class Main extends Application
 		{
 		}
 
-		List<File> selectedFiles = fileChooser.showOpenMultipleDialog(primaryStage);
+		List<Player> players;
 
-		if(selectedFiles == null)
+		while(true)
 		{
-			primaryStage.close();
-			Platform.exit();
+			List<File> selectedFiles = fileChooser.showOpenMultipleDialog(primaryStage);
 
-			return;
-		}
+			if(selectedFiles == null)
+			{
+				primaryStage.close();
+				Platform.exit();
 
-		XMLParser parser = new XMLParser(selectedFiles);
-		parser.parse();
-		List<Player> players = parser.getPlayers();
+				return;
+			}
+			else if(selectedFiles.isEmpty())
+			{
+				Alert alert = new Alert(Alert.AlertType.ERROR, "Veuillez sélectionner au moins un fichier !");
 
-		if(players == null || players.isEmpty() || players.size() > 8)
-		{
-			primaryStage.close();
-			Platform.exit();
+				alert.showAndWait();
 
-			return;
+				continue;
+			}
+
+			XMLParser parser = new XMLParser(selectedFiles);
+			parser.parse();
+			players = parser.getPlayers();
+
+			if(players == null || players.size() < 2 || players.size() > 8)
+			{
+				Alert alert = new Alert(Alert.AlertType.ERROR, "Le nombre de joueurs est incorrect, veuillez resélectionner les automates.");
+
+				alert.showAndWait();
+			}
+			else
+			{
+				break;
+			}
 		}
 
 		int maxStates = 0;
