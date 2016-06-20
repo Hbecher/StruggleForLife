@@ -1,7 +1,13 @@
 package org.angryautomata.game;
 
+/**
+ * Représente une position (x, y) sur le plateau de jeu.
+ */
 public class Position
 {
+	/**
+	 * L'origine
+	 */
 	public static final Position ORIGIN = new Position(0, 0);
 
 	private final int x;

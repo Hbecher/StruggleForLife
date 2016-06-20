@@ -41,11 +41,6 @@
             <HBox spacing="8.0">
                 <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="ALWAYS" maxHeight="527.0" maxWidth="527.0" minHeight="271.0" minViewportHeight="271.0" minViewportWidth="527.0" minWidth="527.0" pannable="true" vbarPolicy="ALWAYS">
                     <StackPane>
-                        <!-- <Canvas fx:id="screen" nodeOrientation="INHERIT">
-                            <cursor>
-                                <Cursor fx:constant="CROSSHAIR" />
-                            </cursor>
-                        </Canvas> -->
                         <GridPane fx:id="gifScreen">
                         </GridPane>
                         <Canvas fx:id="overlay" nodeOrientation="INHERIT" onMouseClicked="#onOverlayMouseClicked">
@@ -69,34 +64,39 @@
                 <Pane>
                     <GridPane alignment="CENTER_LEFT" hgap="4.0">
                         <columnConstraints>
-                            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" />
-                            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" />
+                            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" />
                         </columnConstraints>
                         <rowConstraints>
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                             <RowConstraints vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         </rowConstraints>
-                        <Label text="Joueur :" GridPane.rowIndex="2" />
-                        <ChoiceBox fx:id="playersBox" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                        <Separator GridPane.columnSpan="2" GridPane.rowIndex="1" />
-                        <Label text="Personnages :" GridPane.rowIndex="4" />
-                        <Label fx:id="populationsLabel" text="N/A" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                        <Label text="Gradient total :" GridPane.rowIndex="5" />
-                        <Label fx:id="totalGradientLabel" text="N/A" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                        <Label text="Gradient moyen" GridPane.rowIndex="6" />
-                        <Label fx:id="meanGradientLabel" text="N/A" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                        <Label text="Joueur :" GridPane.rowIndex="3" />
+                        <ChoiceBox fx:id="playersBox" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <Separator GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                        <Label text="Personnages :" GridPane.rowIndex="5" />
+                        <Label fx:id="populationsLabel" text="N/A" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                        <Label text="Gradient total :" GridPane.rowIndex="6" />
+                        <Label fx:id="totalGradientLabel" text="N/A" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                        <Label text="Gradient moyen" GridPane.rowIndex="7" />
+                        <Label fx:id="meanGradientLabel" text="N/A" GridPane.columnIndex="1" GridPane.rowIndex="7" />
                         <Label text="Tour :" />
                         <Label fx:id="ticksLabel" text="N/A" GridPane.columnIndex="1" />
-                        <Label text="Couleur :" GridPane.rowIndex="3" />
-                        <Canvas fx:id="colorCanvas" height="16.0" width="16.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                        <Button mnemonicParsing="false" onAction="#test" text="Aller sur l'automate" GridPane.columnSpan="2" GridPane.rowIndex="8" />
+                        <Label text="Couleur :" GridPane.rowIndex="4" />
+                        <Canvas fx:id="colorCanvas" height="16.0" width="16.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <Separator GridPane.columnSpan="2" GridPane.rowIndex="8" />
+                  <Label text="Gagnant(s) :" GridPane.rowIndex="9" />
+                  <Label fx:id="winnerLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                  <Label text="Joueurs en vie :" GridPane.rowIndex="1" />
+                  <Label fx:id="playersAliveLabel" text="N/A" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                     </GridPane>
                 </Pane>
             </HBox>

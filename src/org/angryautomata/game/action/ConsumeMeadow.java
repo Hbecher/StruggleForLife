@@ -1,7 +1,6 @@
 package org.angryautomata.game.action;
 
 import org.angryautomata.game.Game;
-import org.angryautomata.game.Images;
 import org.angryautomata.game.Population;
 import org.angryautomata.game.Position;
 import org.angryautomata.game.scenery.Desert;
@@ -11,7 +10,7 @@ public class ConsumeMeadow extends Action
 {
 	public ConsumeMeadow()
 	{
-		super(4, Images.forage_back, Images.forage, Images.forage_trapped_back, Images.forage_trapped, Images.vide, Images.vide);
+		super(4);
 	}
 
 	@Override

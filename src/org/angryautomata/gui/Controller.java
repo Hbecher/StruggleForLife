@@ -1,6 +1,7 @@
 package org.angryautomata.gui;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,8 @@ public class Controller extends BorderPane
 {
 	private static final int SQUARE_SIZE = 32;
 
+	private final Deque<Position> conflicts = new ArrayDeque<>(), consumes = new ArrayDeque<>(), traps = new ArrayDeque<>(), invalids = new ArrayDeque<>();
+
 	@FXML
 	public MenuItem placeMarker, eraseMarker, regenAutomaton;
 	@FXML
@@ -34,16 +37,16 @@ public class Controller extends BorderPane
 	@FXML
 	public ChoiceBox<String> playersBox;
 	@FXML
-	public Label ticksLabel, populationsLabel, totalGradientLabel, meanGradientLabel;
+	public Label ticksLabel, playersAliveLabel, populationsLabel, totalGradientLabel, meanGradientLabel, winnerLabel;
 	@FXML
 	public Button pauseOrResumeButton, stopButton, quitButton;
 	@FXML
-	public Canvas colorCanvas, screen, overlay;
+	public Canvas colorCanvas, overlay;
 	@FXML
 	public GridPane gifScreen;
 	private Game game = null;
 	private Position selection = null;
-	private ImageView[][][] tab3d = null;
+	private ImageView[][][] images = null;
 
 	public Controller()
 	{
@@ -75,14 +78,11 @@ public class Controller extends BorderPane
 
 		this.game = game;
 
-		//int height = (SQUARE_SIZE + 1) * game.getHeight() + 1, width = (SQUARE_SIZE + 1) * game.getWidth() + 1;
 		int height = game.getHeight(), width = game.getWidth();
-		//screen.setHeight(height);
-		//screen.setWidth(width);
 		overlay.setHeight(height * SQUARE_SIZE);
 		overlay.setWidth(width * SQUARE_SIZE);
 
-		tab3d = new ImageView[height][width][8];
+		images = new ImageView[height][width][8];
 
 		for(int y = 0; y < height; y++)
 		{
@@ -92,7 +92,7 @@ public class Controller extends BorderPane
 				{
 					ImageView imageView = new ImageView(Images.vide);
 
-					tab3d[y][x][z] = imageView;
+					images[y][x][z] = imageView;
 					gifScreen.add(imageView, x, y);
 				}
 			}
@@ -125,34 +125,6 @@ public class Controller extends BorderPane
 
 	private void init()
 	{
-		/*GraphicsContext gc = screen.getGraphicsContext2D();
-		final int height = game.getHeight(), width = game.getWidth();
-
-		gc.clearRect(0.0D, 0.0D, screen.getWidth(), screen.getHeight());
-		gc.setFill(Color.BLACK);
-
-		double d = (SQUARE_SIZE + 1.0D) * width + 1.0D;
-
-		for(int i = 0; i <= height; i++)
-		{
-			gc.fillRect(0.0D, i * (SQUARE_SIZE + 1.0D), d, 1.0D);
-		}
-
-		d = (SQUARE_SIZE + 1.0D) * height + 1.0D;
-
-		for(int j = 0; j <= width; j++)
-		{
-			gc.fillRect(j * (SQUARE_SIZE + 1.0D), 0.0D, 1.0D, d);
-		}
-
-		for(int i = 0; i < height; i++)
-		{
-			for(int j = 0; j < width; j++)
-			{
-				gc.setFill(game.getSceneryAt(game.torusPos(j, i)).getColor());
-				gc.fillRect(posToCanvas(j), posToCanvas(i), SQUARE_SIZE, SQUARE_SIZE);
-			}
-		}*/
 		final int height = game.getHeight(), width = game.getWidth();
 
 		for(int x = 0; x < width; x++)
@@ -167,33 +139,94 @@ public class Controller extends BorderPane
 		updateControls();
 	}
 
-	public void updateScreen(final Deque<Position> tileUpdates)
+	public void updateScreen(final Deque<Position> tileUpdates, final Deque<Position> conflicts, final Deque<Position> consumes, final Deque<Position> traps, final Deque<Position> invalids)
 	{
 		final List<Population> populations = game.getPopulations();
 		final Map<Player, Position> markers = game.getMarkers();
-
-		//final GraphicsContext gc = screen.getGraphicsContext2D();
 
 		while(!tileUpdates.isEmpty())
 		{
 			Position position = tileUpdates.poll();
 
-			clearImageView(position.getX(), position.getY());
-			setImage(position.getX(), position.getY(), 0, game.getSceneryAt(position).getImage());
-			/*gc.setFill(game.getSceneryAt(position).getColor());
-			gc.fillRect(posToCanvas(position.getX()), posToCanvas(position.getY()), SQUARE_SIZE, SQUARE_SIZE);*/
+			Scenery scenery = game.getSceneryAt(position);
+			setImage(position.getX(), position.getY(), 0, scenery.getImage());
+			setImage(position.getX(), position.getY(), 2, scenery.isTrapped() ? Images.trapped : Images.vide);
+		}
+
+		while(!this.conflicts.isEmpty())
+		{
+			Position conflict = this.conflicts.poll();
+
+			setImage(conflict.getX(), conflict.getY(), 7, Images.vide);
+		}
+
+		while(!conflicts.isEmpty())
+		{
+			Position conflict = conflicts.poll();
+
+			setImage(conflict.getX(), conflict.getY(), 7, Images.conflict);
+
+			this.conflicts.add(conflict);
+		}
+
+		while(!this.consumes.isEmpty())
+		{
+			Position consume = this.consumes.poll();
+
+			setImage(consume.getX(), consume.getY(), 1, Images.vide);
+			setImage(consume.getX(), consume.getY(), 5, Images.vide);
+		}
+
+		while(!consumes.isEmpty())
+		{
+			Position consume = consumes.poll();
+			Scenery scenery = game.getSceneryAt(consume);
+
+			setImage(consume.getX(), consume.getY(), 1, scenery.isTrapped() ? Images.forage_trapped_back : Images.forage_back);
+			setImage(consume.getX(), consume.getY(), 5, scenery.isTrapped() ? Images.forage_trapped : Images.forage);
+
+			this.consumes.add(consume);
+		}
+
+		while(!this.traps.isEmpty())
+		{
+			Position trap = this.traps.poll();
+
+			setImage(trap.getX(), trap.getY(), 1, Images.vide);
+			setImage(trap.getX(), trap.getY(), 5, Images.vide);
+		}
+
+		while(!traps.isEmpty())
+		{
+			Position trap = traps.poll();
+
+			setImage(trap.getX(), trap.getY(), 1, Images.forage_trapped_back);
+			setImage(trap.getX(), trap.getY(), 5, Images.trap);
+
+			this.traps.add(trap);
+		}
+
+		while(!this.invalids.isEmpty())
+		{
+			Position invalid = this.invalids.poll();
+
+			setImage(invalid.getX(), invalid.getY(), 6, Images.vide);
+		}
+
+		while(!invalids.isEmpty())
+		{
+			Position invalid = invalids.poll();
+
+			setImage(invalid.getX(), invalid.getY(), 6, Images.invalid);
+
+			this.invalids.add(invalid);
 		}
 
 		for(Population population : populations)
 		{
 			Position previous = population.getPreviousPosition();
 
-			/*gc.setFill(game.getSceneryAt(previous).getColor());
-			gc.fillRect(posToCanvas(previous.getX()), posToCanvas(previous.getY()), SQUARE_SIZE, SQUARE_SIZE);
-
-			gc.setFill(game.getSceneryAt(position).getColor());
-			gc.fillRect(posToCanvas(position.getX()), posToCanvas(position.getY()), SQUARE_SIZE, SQUARE_SIZE);*/
-			setImage(previous.getX(), previous.getY(), 6, Images.vide);
+			setImage(previous.getX(), previous.getY(), 4, Images.vide);
 		}
 
 		for(Population population : populations)
@@ -223,20 +256,14 @@ public class Controller extends BorderPane
 				image = Images.pop95;
 			}
 
-			setImage(position.getX(), position.getY(), 6, image);
-
-			/*double x = gradient >= Population.GRADIENT_MAX ? SQUARE_SIZE / 4.0D : gradient * 0.12D + 4.0D, length = 2.0D * x, offset = SQUARE_SIZE / 2.0D - x;
-
-			gc.setFill(population.getColor());
-			gc.fillRect(posToCanvas(position.getX()) + offset, posToCanvas(position.getY()) + offset, length, length);*/
+			setImage(position.getX(), position.getY(), 4, image);
 		}
 
 		for(Map.Entry<Player, Position> entry : markers.entrySet())
 		{
-			Position position = entry.getValue();
+			Position marker = entry.getValue();
 
-			/*gc.setFill(entry.getKey().getColor());
-			gc.fillOval(posToCanvas(position.getX()) + 12.0D, posToCanvas(position.getY()) + 12.0D, 8.0D, 8.0D);*/
+			//setImage(marker.getX(), marker.getY(), Images.);
 		}
 
 		updateData();
@@ -245,12 +272,12 @@ public class Controller extends BorderPane
 
 	private double posToCanvas(int pos)
 	{
-		return pos * SQUARE_SIZE;//pos * (SQUARE_SIZE + 1.0D) + 1.0D;
+		return pos * SQUARE_SIZE;
 	}
 
 	private int canvasToPos(double pos)
 	{
-		return (int) (pos / SQUARE_SIZE);//(int) ((pos - 1.0D) / (SQUARE_SIZE + 1.0D));
+		return (int) (pos / SQUARE_SIZE);
 	}
 
 	private void updateOverlay()
@@ -301,6 +328,7 @@ public class Controller extends BorderPane
 	private void updateData()
 	{
 		ticksLabel.setText(Integer.toString(game.ticks()));
+		playersAliveLabel.setText(Integer.toString(game.playersAlive()));
 
 		Player player = game.getPlayer(playersBox.getValue());
 
@@ -331,7 +359,6 @@ public class Controller extends BorderPane
 
 		if(player != null)
 		{
-			System.out.println(player.isDead());
 			if(!player.isDead())
 			{
 				placeMarker.setDisable(!player.canPlaceMarker());
@@ -428,30 +455,9 @@ public class Controller extends BorderPane
 		}
 	}
 
-	@FXML
-	public void test(ActionEvent e)
-	{
-		Stage stage = (Stage) getScene().getWindow();
-		stage.setFullScreen(!stage.isFullScreen());
-	}
-
-	public Position getSelection()
-	{
-		return selection;
-	}
-
 	private ImageView getImageView(int x, int y, int z)
 	{
-		try
-		{
-			return tab3d[y][x][z];
-		}
-		catch(ArrayIndexOutOfBoundsException e)
-		{
-			System.out.println(x + " " + y + " " + z);
-		}
-
-		return null;
+		return images[y][x][z];
 	}
 
 	private void setImage(int x, int y, int z, Image image)
@@ -465,5 +471,13 @@ public class Controller extends BorderPane
 		{
 			setImage(x, y, z, Images.vide);
 		}
+	}
+
+	public void displayWinner(String playerName)
+	{
+		winnerLabel.setText(playerName);
+		stopButton.setDisable(true);
+		pauseOrResumeButton.setDisable(true);
+		tickSpeed.setDisable(true);
 	}
 }
