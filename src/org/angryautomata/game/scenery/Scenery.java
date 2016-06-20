@@ -1,7 +1,6 @@
 package org.angryautomata.game.scenery;
 
 import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
 import org.angryautomata.game.action.Action;
 
 /**
@@ -36,8 +35,6 @@ public class Scenery
 	 */
 	private final int[] validActions;
 
-	private final Color color;
-
 	/**
 	 * La texture du décor.
 	 */
@@ -57,14 +54,13 @@ public class Scenery
 	 * @param trapped      si le décor est piégé ou non
 	 * @param image        la texture du décor
 	 */
-	protected Scenery(int symbol, int[] validActions, int gradient, boolean trapped, Color color, Image image)
+	protected Scenery(int symbol, int[] validActions, int gradient, boolean trapped, Image image)
 	{
 		this.symbol = trapped ? symbol + SCENERIES - 1 : symbol;
 		fakeSymbol = symbol;
 		this.gradient = trapped ? -gradient : gradient;
 		this.validActions = validActions;
 		this.trapped = trapped;
-		this.color = color;
 		this.image = image;
 	}
 
@@ -158,11 +154,6 @@ public class Scenery
 	public int[] getValidActions()
 	{
 		return validActions;
-	}
-
-	public Color getColor()
-	{
-		return color;
 	}
 
 	public Image getImage()
