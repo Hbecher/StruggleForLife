@@ -28,7 +28,7 @@ public class Controller extends VBox
 {
 	private static final int SQUARE_SIZE = 32;
 
-	private final Deque<Position> conflicts = new ArrayDeque<>(), consumes = new ArrayDeque<>(), consumesTrap = new ArrayDeque<>(), traps = new ArrayDeque<>(), invalids = new ArrayDeque<>();
+	private final Deque<Position> conflicts = new ArrayDeque<>(), consumes = new ArrayDeque<>(), consumesTrap = new ArrayDeque<>(), traps = new ArrayDeque<>(), invalids = new ArrayDeque<>(), deaths = new ArrayDeque<>();
 
 	@FXML
 	public MenuItem placeMarker, eraseMarker, regenAutomaton;
@@ -150,7 +150,7 @@ public class Controller extends VBox
 	/**
 	 * Appelé à chaque mise à jour d'écran, avec les différentes files de modifications.
 	 */
-	public void updateScreen(final Deque<Position> tileUpdates, final Deque<Position> conflicts, final Deque<Position> consumes, final Deque<Position> consumesTrap, final Deque<Position> traps, final Deque<Position> invalids)
+	public void updateScreen(final Deque<Position> tileUpdates, final Deque<Position> conflicts, final Deque<Position> consumes, final Deque<Position> consumesTrap, final Deque<Position> traps, final Deque<Position> invalids, final Deque<Position> deaths)
 	{
 		final List<Population> populations = game.getPopulations();
 		final Map<Player, Position> markers = game.getMarkers();
@@ -249,6 +249,22 @@ public class Controller extends VBox
 			setImage(invalid.getX(), invalid.getY(), 6, Images.invalid);
 
 			this.invalids.add(invalid);
+		}
+
+		while(!this.deaths.isEmpty())
+		{
+			Position death = this.deaths.poll();
+
+			setImage(death.getX(), death.getY(), 4, Images.vide);
+		}
+
+		while(!deaths.isEmpty())
+		{
+			Position death = deaths.poll();
+
+			setImage(death.getX(), death.getY(), 4, Images.pop_death);
+
+			this.deaths.add(death);
 		}
 
 		for(Population population : populations)

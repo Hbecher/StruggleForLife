@@ -56,7 +56,7 @@ public class Game implements Runnable
 	/**
 	 * Ces listes contiennent les actions à afficher à l'écran
 	 */
-	private final Deque<Position> tileUpdates = new ArrayDeque<>(), conflicts = new ArrayDeque<>(), consumes = new ArrayDeque<>(), consumesTrap = new ArrayDeque<>(), traps = new ArrayDeque<>(), invalids = new ArrayDeque<>();
+	private final Deque<Position> tileUpdates = new ArrayDeque<>(), conflicts = new ArrayDeque<>(), consumes = new ArrayDeque<>(), consumesTrap = new ArrayDeque<>(), traps = new ArrayDeque<>(), invalids = new ArrayDeque<>(), deaths = new ArrayDeque<>();
 
 	/**
 	 * Le lien entre l'interface utilisateur et le simulateur
@@ -346,7 +346,7 @@ public class Game implements Runnable
 			ticks++;
 
 			// on affiche le tour
-			Platform.runLater(() -> controller.updateScreen(tileUpdates, conflicts, consumes, consumesTrap, traps, invalids));
+			Platform.runLater(() -> controller.updateScreen(tileUpdates, conflicts, consumes, consumesTrap, traps, invalids, deaths));
 
 			// si le tour s'est calculé plus vite que l'attente entre deux tours, on attend
 			try
@@ -505,6 +505,8 @@ public class Game implements Runnable
 	private void removePopulation(Population population)
 	{
 		population.die();
+
+		deaths.add(population.getPosition());
 
 		populations.remove(population);
 	}

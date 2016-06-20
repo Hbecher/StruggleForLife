@@ -74,12 +74,12 @@ public abstract class Action
 
 			case 0:
 			{
-				actions.add(new MoveNorth());
-				actions.add(new MoveEast());
-				actions.add(new MoveSouth());
-				actions.add(new MoveWest());
+			actions.add(new MoveNorth());
+			actions.add(new MoveEast());
+			actions.add(new MoveSouth());
+			actions.add(new MoveWest());
 
-				break;
+			break;
 			}
 
 			case 1:
